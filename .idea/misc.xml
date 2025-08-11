@@ -9,6 +9,7 @@
         <option value="$PROJECT_DIR$/trustai-common/pom.xml" />
         <option value="$PROJECT_DIR$/income-service/pom.xml" />
         <option value="$PROJECT_DIR$/investment-service/pom.xml" />
+        <option value="$PROJECT_DIR$/mlm-rank-service/pom.xml" />
       </list>
     </option>
   </component>
