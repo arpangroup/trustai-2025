@@ -10,6 +10,7 @@
     <file url="file://$PROJECT_DIR$/product-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/rank-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/storage-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/transaction-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/trustai-core-app/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/user-service/src/main/java" charset="UTF-8" />
   </component>

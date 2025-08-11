@@ -13,12 +13,13 @@
         <module>app-starter-parent</module>
         <module>common-base</module>
         <module>user-service</module>
-        <module>storage-service</module>
-        <module>notification-service</module>
-        <module>product-service</module>
         <module>rank-service</module>
         <module>income-service</module>
         <module>investment-service</module>
+        <module>transaction-service</module>
+        <module>storage-service</module>
+        <module>notification-service</module>
+        <module>product-service</module>
         <module>trustai-core-app</module>
     </modules>
 
