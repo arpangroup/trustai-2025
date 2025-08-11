@@ -18,11 +18,53 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
         </processorPath>
         <module name="rank-service" />
-        <module name="investment-service" />
+        <module name="product-service" />
+        <module name="notification-service" />
+      </profile>
+      <profile name="Annotation profile for storage-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
+        </processorPath>
         <module name="storage-service" />
+      </profile>
+      <profile name="Annotation profile for user-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
+        </processorPath>
         <module name="user-service" />
+      </profile>
+      <profile name="Annotation profile for common-base" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
+        </processorPath>
         <module name="common-base" />
+      </profile>
+      <profile name="Annotation profile for income-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
+        </processorPath>
         <module name="income-service" />
+      </profile>
+      <profile name="Annotation profile for investment-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
+        </processorPath>
+        <module name="investment-service" />
       </profile>
     </annotationProcessing>
   </component>
@@ -32,6 +74,7 @@
       <module name="income-service" options="-parameters" />
       <module name="investment-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />
+      <module name="product-service" options="-parameters" />
       <module name="rank-service" options="-parameters" />
       <module name="storage-service" options="-parameters" />
       <module name="trustai-core-app" options="-parameters" />
