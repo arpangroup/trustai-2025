@@ -4,7 +4,7 @@ import com.trustai.common_base.domain.user.User;
 import com.trustai.common_base.dto.UserDetailsInfo;
 import com.trustai.common_base.dto.UserInfo;
 import com.trustai.common_base.repository.user.UserRepository;
-import com.trustai.user_service.auth.service.RegistrationService;
+import com.trustai.common_base.auth.service.RegistrationService;
 import com.trustai.user_service.user.dto.PasswordUpdateRequest;
 import com.trustai.user_service.user.mapper.UserMapper;
 import com.trustai.user_service.user.service.UserAccountService;

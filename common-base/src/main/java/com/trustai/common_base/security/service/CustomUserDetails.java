@@ -1,8 +1,7 @@
-/*
 package com.trustai.trustai_common.security.service;
 
-import com.trustai.trustai_common.domain.user.Role;
-import com.trustai.trustai_common.domain.user.User;
+import com.trustai.common_base.domain.user.Role;
+import com.trustai.common_base.domain.user.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,6 +18,9 @@ public class CustomUserDetails implements UserDetails {
     private final String password;
     private final boolean enabled;
     private final Set<GrantedAuthority> authorities;
+    private final User.AccountStatus accountStatus;
+    private final String email;
+    private final String mobile;
 
     public CustomUserDetails(User user) {
         this.id = user.getId();
@@ -30,6 +32,9 @@ public class CustomUserDetails implements UserDetails {
                 .map(Role::getCode)
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
+        this.accountStatus = user.accountStatus;
+        this.email = user.getEmail();
+        this.mobile = user.getMobile();
     }
 
     @Override
@@ -42,6 +47,5 @@ public class CustomUserDetails implements UserDetails {
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return enabled; }
+    @Override public boolean isEnabled() { return accountStatus == User.AccountStatus.ACTIVE; }
 }
-*/

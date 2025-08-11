@@ -1,7 +1,7 @@
 package com.trustai.user_service.user.validation;
 
 import com.trustai.common_base.repository.user.UserRepository;
-import com.trustai.user_service.auth.request.RegistrationRequest;
+import com.trustai.common_base.auth.dto.RegistrationRequest;
 import com.trustai.user_service.user.exception.DuplicateRecordException;
 import com.trustai.user_service.user.exception.InvalidRequestException;
 import jakarta.validation.ValidationException;

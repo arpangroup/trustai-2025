@@ -1,5 +1,4 @@
-/*
-package com.trustai.trustai_common.security;
+package com.trustai.common_base.security;
 
 import com.trustai.trustai_common.security.service.CustomUserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,4 +24,3 @@ public class SecurityUtils {
         return ((UserDetails) auth.getPrincipal()).getUsername();
     }
 }
-*/

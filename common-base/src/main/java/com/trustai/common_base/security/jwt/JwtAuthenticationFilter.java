@@ -1,14 +1,14 @@
-/*
-package com.trustai.trustai_common.security.jwt;
+package com.trustai.common_base.security.jwt;
 
-import com.trustai.trustai_common.security.SecurityUtils;
-import com.trustai.trustai_common.security.service.CustomUserDetailsService;
+import com.trustai.common_base.security.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -32,12 +32,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         try {
-            String jwt = resolveToken(request);
-            if (StringUtils.hasText(jwt) && jwtProvider.validateToken(jwt)) {
-                String username = jwtProvider.getSubjectFromToken(jwt);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                var authentication = SecurityUtils.createAuthentication(userDetails);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            String token = extractToken(request);
+            if (token != null && jwtProvider.validateToken(token)) {
+                String username = jwtProvider.getUsername(token);
+                var userDetails = userDetailsService.loadUserByUsername(username);
+
+                //var authentication = SecurityUtils.createAuthentication(userDetails);
+                //SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                var auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
         } catch (Exception ex) {
             // skip setting security context — AuthEntryPoint will handle unauthorized responses
@@ -46,15 +51,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String resolveToken(HttpServletRequest req) {
-        String bearer = req.getHeader("Authorization");
-        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7);
+    private String extractToken(HttpServletRequest req) {
+        String bearerHeader = req.getHeader("Authorization");
+        if (StringUtils.hasText(bearerHeader) && bearerHeader.startsWith("Bearer ")) {
+            return bearerHeader.substring(7);
         }
-        String param = req.getParameter("access_token");
-        if (StringUtils.hasText(param)) return param;
         return null;
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // Only filter /api/** (stateless API)
+        String path = request.getServletPath();
+        return !path.startsWith("/api/");
+    }
 }
-*/

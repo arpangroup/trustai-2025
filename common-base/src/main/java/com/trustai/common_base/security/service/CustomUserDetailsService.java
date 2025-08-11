@@ -1,28 +1,27 @@
-/*
-package com.trustai.trustai_common.security.service;
+package com.trustai.common_base.security.service;
 
-import com.trustai.trustai_common.domain.user.User;
-import com.trustai.trustai_common.repository.user.UserRepository;
+import com.trustai.common_base.domain.user.User;
+import com.trustai.common_base.repository.user.UserRepository;
+import com.trustai.trustai_common.security.service.CustomUserDetails;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
-
     private final UserRepository userRepo;
-
-    public CustomUserDetailsService(UserRepository userRepo) {
-        this.userRepo = userRepo;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        User user = userRepo.findByUsername(usernameOrEmail)
+        /*User user = userRepo.findByUsername(usernameOrEmail)
                 .or(() -> userRepo.findByEmail(usernameOrEmail))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + usernameOrEmail));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + usernameOrEmail));*/
+        User user = new User("admin");
+        user.setPassword("$2a$12$dokOUjkyRo.YhTOBdmcEUuh82sf4vRcd1BnmcRu18K7vSCd5d4B.S");
+        user.setAccountStatus(User.AccountStatus.INACTIVE);
         return new CustomUserDetails(user);
     }
 }
-*/

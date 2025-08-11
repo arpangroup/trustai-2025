@@ -1,4 +1,3 @@
-/*
 package com.trustai.trustai_common.security;
 
 import jakarta.servlet.ServletException;
@@ -30,4 +29,3 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
         response.getWriter().write(body.toString());
     }
 }
-*/
