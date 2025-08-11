@@ -1,9 +1,9 @@
 /*
 package com.trustai.income_service.referral.calculator;
 
-import com.trustai.common.client.UserClient;
-import com.trustai.common.dto.UserInfo;
-import com.trustai.common.enums.CalculationType;
+import com.trustai.common_base.client.UserClient;
+import com.trustai.common_base.dto.UserInfo;
+import com.trustai.common_base.enums.CalculationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -15,10 +15,10 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
         </processorPath>
-        <module name="storage-service" />
         <module name="user-service" />
+        <module name="investment-service" />
+        <module name="storage-service" />
         <module name="common-base" />
         <module name="income-service" />
       </profile>
@@ -28,6 +28,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="common-base" options="-parameters" />
       <module name="income-service" options="-parameters" />
+      <module name="investment-service" options="-parameters" />
       <module name="storage-service" options="-parameters" />
       <module name="trustai-core-app" options="-parameters" />
       <module name="user-service" options="-parameters" />

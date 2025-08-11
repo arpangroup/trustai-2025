@@ -15,6 +15,7 @@
         <module>user-service</module>
         <module>storage-service</module>
         <module>income-service</module>
+        <module>investment-service</module>
         <module>trustai-core-app</module>
     </modules>
 

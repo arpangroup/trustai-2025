@@ -1,9 +1,9 @@
 /*
 package com.trustai.income_service.client;
 
-import com.trustai.common.api.RankConfigApi;
-import com.trustai.common.config.FeignConfig;
-import com.trustai.common.constants.CommonConstants;
+import com.trustai.common_base.api.RankConfigApi;
+import com.trustai.common_base.config.FeignConfig;
+import com.trustai.common_base.constants.CommonConstants;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.openfeign.FeignClient;
 
