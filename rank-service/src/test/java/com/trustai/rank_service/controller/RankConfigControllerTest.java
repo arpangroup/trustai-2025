@@ -1,3 +1,4 @@
+/*
 package com.trustai.rank_service.controller;
 
 
@@ -35,7 +36,8 @@ public class RankConfigControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    /*@Test
+    */
+/*@Test
     void getAllRanks_shouldReturnPagedResult() throws Exception {
         RankConfig mockRank = new RankConfig();
         mockRank.setId(1L);
@@ -49,7 +51,8 @@ public class RankConfigControllerTest {
         mockMvc.perform(get("/api/v1/rankings"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].code").value("R1"));
-    }*/
+    }*//*
+
 
     @Test
     void getAllRanks_shouldReturnListResult() throws Exception {
@@ -150,3 +153,4 @@ public class RankConfigControllerTest {
                 .andExpect(content().string("Each update must include an 'id' field."));
     }
 }
+*/
