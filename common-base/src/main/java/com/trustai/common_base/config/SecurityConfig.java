@@ -58,7 +58,7 @@ public class SecurityConfig {
                 )
                 //.formLogin(Customizer.withDefaults())
                 .formLogin(form -> form
-                        .defaultSuccessUrl("/users", true)
+                        .defaultSuccessUrl("/", true)
                 )
                 .logout(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable());
