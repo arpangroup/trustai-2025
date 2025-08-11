@@ -4,7 +4,7 @@ import com.trustai.common_base.auth.dto.VerifyEmailRequest;
 import com.trustai.common_base.auth.entity.RegistrationProgress;
 import com.trustai.common_base.auth.entity.VerificationToken;
 import com.trustai.common_base.auth.entity.VerificationType;
-import com.trustai.common_base.auth.exception.AuthenticationException;
+import com.trustai.common_base.auth.exception.AuthException;
 import com.trustai.common_base.auth.repository.RegistrationProgressRepository;
 import com.trustai.common_base.auth.repository.VerificationTokenRepository;
 import com.trustai.common_base.domain.user.User;
@@ -36,7 +36,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     public void initiateRegistration(InitiateRegistrationRequest request, HttpServletRequest servletRequest) {
         log.info("Initiate Registration: {}", request);
         if (userRepo.existsByUsername(request.username) || userRepo.existsByEmail(request.email)) {
-            throw new AuthenticationException("Username or Email already in use");
+            throw new AuthException("Username or Email already in use");
         }
 
         log.info("Creating RegistrationProgress log.......");
@@ -78,7 +78,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public void verifyEmail(VerifyEmailRequest request) {
         log.info("verifyEmail for email: {}, otp: {}", request.getEmail(), request.getOtp());
-        RegistrationProgress progress = progressRepo.findByEmail(request.email).orElseThrow(() -> new AuthenticationException("No registration in progress"));
+        RegistrationProgress progress = progressRepo.findByEmail(request.email).orElseThrow(() -> new AuthException("No registration in progress"));
 
         log.info("Verify token.....");
         VerificationToken token = tokenRepo.findByTypeAndTarget(VerificationType.EMAIL, request.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid or expired token"));
@@ -101,8 +101,8 @@ public class RegistrationServiceImpl implements RegistrationService {
     public void completeRegistration(CompleteRegistrationRequest request) {
         log.info("Complete Registration Request: {}", request);
         if (!request.getPassword().equals(request.confirmPassword)) throw new IllegalArgumentException("Passwords do not match");
-        RegistrationProgress progress = progressRepo.findByEmail(request.email).orElseThrow(() -> new AuthenticationException("No registration in progress"));
-        if (!progress.isEmailVerified())throw new AuthenticationException("Email not verified");
+        RegistrationProgress progress = progressRepo.findByEmail(request.email).orElseThrow(() -> new AuthException("No registration in progress"));
+        if (!progress.isEmailVerified())throw new AuthException("Email not verified");
 
         // Create a new user
         User newUser = registrationHelper.mapToUser(progress, request.getPassword());

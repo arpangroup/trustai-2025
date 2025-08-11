@@ -21,7 +21,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + usernameOrEmail));*/
         User user = new User("admin");
         user.setPassword("$2a$12$dokOUjkyRo.YhTOBdmcEUuh82sf4vRcd1BnmcRu18K7vSCd5d4B.S");
-        user.setAccountStatus(User.AccountStatus.INACTIVE);
         return new CustomUserDetails(user);
     }
 }

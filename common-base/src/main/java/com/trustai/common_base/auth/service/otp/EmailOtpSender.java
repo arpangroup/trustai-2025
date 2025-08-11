@@ -11,6 +11,8 @@ public class EmailOtpSender implements OtpSender {
     @Override
     public void sendOtp(String to, String otp) {
         // integrate with mail service
+        System.out.println("============================================");
         System.out.println("Sending OTP " + otp + " to email: " + to);
+        System.out.println("============================================");
     }
 }

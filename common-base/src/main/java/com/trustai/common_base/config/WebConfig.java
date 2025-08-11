@@ -1,3 +1,4 @@
+/*
 package com.trustai.common_base.config;
 
 import org.springframework.context.annotation.Bean;
@@ -31,3 +32,4 @@ public class WebConfig {
         };
     }
 }
+*/

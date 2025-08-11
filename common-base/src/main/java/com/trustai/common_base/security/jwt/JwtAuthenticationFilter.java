@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -34,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = extractToken(request);
             if (token != null && jwtProvider.validateToken(token)) {
-                String username = jwtProvider.getUsername(token);
+                String username = jwtProvider.extractUsername(token);
                 var userDetails = userDetailsService.loadUserByUsername(username);
 
                 //var authentication = SecurityUtils.createAuthentication(userDetails);
@@ -64,5 +63,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Only filter /api/** (stateless API)
         String path = request.getServletPath();
         return !path.startsWith("/api/");
+//        return path.startsWith("/api/v1/auth/");
     }
 }

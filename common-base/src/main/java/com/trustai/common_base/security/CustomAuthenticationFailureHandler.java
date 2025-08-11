@@ -1,4 +1,4 @@
-package com.trustai.common_base.security.service;
+package com.trustai.common_base.security;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,8 +12,6 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @Component
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
