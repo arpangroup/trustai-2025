@@ -30,7 +30,7 @@ import java.util.Random;
 public class RegistrationHelper {
     private final VerificationTokenRepository tokenRepo;
     private final IpLocationService ipLocationService;
-    private final PasswordEncoder passwordEncoder;
+//    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -78,7 +78,7 @@ public class RegistrationHelper {
         newUser.setEmail(progress.getEmail());
         newUser.setUsername(progress.getUsername());
         newUser.setMobile(progress.getMobile());
-        newUser.setPassword(passwordEncoder.encode(password));
+//        newUser.setPassword(passwordEncoder.encode(password));
         newUser.setEmailVerified(true);
         newUser.setCreatedAt(LocalDateTime.now());
 
