@@ -7,6 +7,7 @@
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/trustai-core-app/pom.xml" />
         <option value="$PROJECT_DIR$/trustai-common/pom.xml" />
+        <option value="$PROJECT_DIR$/income-service/pom.xml" />
       </list>
     </option>
   </component>
