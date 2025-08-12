@@ -29,7 +29,7 @@ public class AuthController {
         Object res = authService.startAuth(request);
         if (res instanceof String) {
             // For password flow our UsernamePasswordAuthStrategy returns username; issue token immediately
-            if ("password".equals(request.getFlow()) || request.getFlow() == null) {
+            if ("password".equals(request.flow()) || request.flow() == null) {
                 return ResponseEntity.ok(authService.issueTokenForUsername((String) res));
             } else {
                 // 2-step returns sessionId

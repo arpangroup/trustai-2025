@@ -298,3 +298,251 @@ Caught by:
 6. Use TLS/HTTPS always.
 7. Use secure, sufficiently random secret for JWT. Rotate keys using JWKs if needed.
 8. Add multi-factor backup codes, remember-device, TOTP (Google Authenticator) support as additional strategies.
+
+
+---
+
+# 1. Record login audits, IP and device info
+````java
+CREATE TABLE auth_audit (
+  id BIGSERIAL PRIMARY KEY,
+  username VARCHAR(255),
+  flow VARCHAR(50),          -- e.g. "password","passwordless","2step"
+  outcome VARCHAR(20),       -- "SUCCESS" or "FAIL"
+  reason VARCHAR(255),       -- optional failure reason
+  ip VARCHAR(45),
+  user_agent TEXT,
+  device_id VARCHAR(255),    -- optional client-generated device id
+  created_at timestamptz DEFAULT now()
+);
+````
+
+### Spring entity + service (sketch)
+````java
+@Entity class AuthAudit { /* fields from schema */ }
+
+@Service class AuthAuditService {
+  private final AuthAuditRepository repo;
+  public void record(String username, String flow, String outcome, String reason,
+                     HttpServletRequest req) {
+    String ip = extractIp(req);
+    String ua = req.getHeader("User-Agent");
+    String device = req.getHeader("X-Device-Id"); // optional
+    repo.save(new AuthAudit(...));
+  }
+}
+````
+Where to call — call `AuthAuditService.record(...)`:
+- On every AuthService.startAuth(...) (record attempt).
+- On verifyOtpAndIssueToken(...) (record success/fail).
+- On JWT login via refresh or form.
+
+
+# 2) Limit OTP attempts and rate-limit login attempts
+Two layers:
+1. **Per-session OTP attempts** — track attempts for a `sessionId` (from `OtpService`).
+2. **Per-user and per-IP rate limiting** — block or slow down after N attempts/period.
+
+Store attempt counters in Redis (fast, TTL support): <br/>
+Key examples:
+- `otp:attempt:{sessionId}` → increment, TTL = session TTL
+- `login:attempt:user:{username}` → increment, TTL e.g. 1 hour
+- `login:attempt:ip:{ip}` → increment, TTL e.g. 1 hour
+
+
+Pseudo-code
+````java
+int attempts = redis.incr("otp:attempt:" + sessionId);
+if (attempts == 1) redis.expire(..., otpTtlSeconds);
+if (attempts > MAX_OTP_TRIES) throw new OtpInvalidException("Too many attempts");
+````
+**Libraries:**
+- For rate-limiting: **Bucket4j** (in-memory or distributed with Redis) or Redis token bucket using Lua scripts
+- For Spring integration: `resilience4j-ratelimiter` or `spring-boot-starter-redis` + custom logic.
+
+
+
+# 3) Rate limiting: prevent brute-force OTP guesses
+Same technique as (2), but hardened:
+- **Block windows**: after N failures within window T, temporarily block (e.g., 5 attempts → block 15 minutes).
+- **Exponential backoff**: increase TTL or penalty on repeated blocks.
+- **IP + username correlation**: block if either crosses threshold.
+- **CAPTCHA**: escalate to CAPTCHA after suspicious behaviour (optional).
+- **Logging & alerting**: push to monitoring when repeated blocks happen.
+
+**Example: block key**
+- block:login:user:{username} store boolean with TTL when threshold exceeded.
+
+
+## 4) Add refresh-token support
+**Design choices**: opaque refresh tokens stored server-side (recommended) vs long-lived JWT refresh tokens (less safe). I recommend opaque, rotating refresh tokens.
+
+
+## Refresh token flow (recommended):
+- On initial login (or token issuance), generate:
+  - Access token = short-lived JWT (e.g., 15m)
+  - Refresh token = long random opaque string (e.g., 128-bit base64), store hashed in DB or Redis with metadata (user, device, expiry)
+- POST `/api/auth/refresh` receives refresh token, validate against DB, issue new access token and rotate refresh token (issue new refresh, invalidate old). Store previous tokens to detect reuse (optional).
+
+## Schema example
+````sql
+CREATE TABLE refresh_tokens (
+  token_hash CHAR(64) PRIMARY KEY,
+  user_id bigint REFERENCES users(id),
+  device_id varchar(255),
+  issued_at timestamptz DEFAULT now(),
+  expires_at timestamptz,
+  revoked boolean DEFAULT false
+);
+````
+Hash tokens with HMAC or SHA-256 before storing.
+
+### Controller sketch
+````java
+@PostMapping("/refresh")
+public ResponseEntity<?> refresh(@RequestBody RefreshRequest r) {
+  String incoming = r.getRefreshToken();
+  String hash = sha256(incoming);
+  RefreshToken row = repo.findById(hash).orElseThrow(...);
+  if (row.revoked || row.expiresAt.before(now)) throw new Unauthorized();
+  // rotate:
+  repo.delete(row);
+  String newToken = generateRandom();
+  repo.save(new RefreshToken(sha256(newToken), ...));
+  String newAccess = jwtProvider.generateToken(row.userId);
+  return ok(Map.of("access", newAccess, "refresh", newToken));
+}
+````
+Cookies: for web UI, place refresh token in an `HttpOnly`, `Secure`, `SameSite=Strict` cookie. For mobile, store securely (Keychain/Keystore).
+
+
+# 5) Fallback: support password login when OTP locked out
+Approach:
+-  Track `otp_locked` status per user when OTP route is abused.
+- Provide an alternative path:
+  - If `otp_locked==true`, `startAuth("password")` path is allowed for the user (password login still works).
+  - Or allow admin override / password reset flow.
+
+**Implementation:**
+- Add `otp_locked_until` column in user table.
+- `PasswordAuthStrategy` should check `otp_locked_until` and allow normal password login.
+
+
+# 6) Use TLS/HTTPS always
+Mandatory for production. Enforce at multiple levels:
+- Terminate TLS at load balancer/ingress (ALB, nginx, Cloud Run, etc.). Use strong TLS configs (no TLS 1.0/1.1).
+- Enable `server.ssl.*` only for direct deployments if needed.
+- In Spring Boot, enforce secure cookies and HSTS:
+
+````yaml
+server:
+  use-forward-headers: true
+# set Secure flag on cookies, set HSTS header in responses via Spring Security:
+http.headers().httpStrictTransportSecurity().maxAgeInSeconds(31536000).includeSubDomains(true);
+`````
+- Redirect HTTP → HTTPS.
+
+
+# 7) Use secure, sufficiently random secret for JWT; rotate keys using JWKs if needed
+
+### Simple (HMAC):
+- Use a long random secret (`>= 256 bits`) stored in a secrets manager (Vault, AWS Secrets Manager, KMS).
+- Don’t check secrets into code.
+
+### Better (asymmetric):
+- Use RSA/ECDSA keys and expose a JWKS endpoint (`/.well-known/jwks.json`) with public keys and `kids`.
+- Sign JWT with private key; clients/services validate signature with public key.
+- Rotation: add new key pair, publish in JWKS, stop accepting old key after grace period, remove rotated key.
+- Use libraries: Nimbus JOSE JWT (`com.nimbusds:nimbus-jose-jwt`) or Spring Security OAuth support.
+
+### Key management:
+- Use a secure KMS/Vault to generate and store private keys; keys should be stored in KMS and signed there if possible (so private key never leaves the KMS).
+
+
+# 8) Add multi-factor backup codes, remember-device, TOTP (Google Authenticator)
+Each can be an extra `AuthenticationStrategy` or part of an MFA orchestrator.
+
+## TOTP (Google Authenticator)
+- Generate a TOTP secret (base32) per user. Store hashed or encrypted.
+- Use an RFC 6238 library: e.g., `com.eatthepath:otp-java` or `com.warrenstrange:googleauth`.
+- Flow:
+  1. User registers and you show a QR code (otpauth://...) to add to Google Authenticator.
+  2. On login, after password verify, request TOTP code and validate TOTP.validate(code, secret).
+- Store `lastUsedTimeStep` to prevent replay.
+
+
+### Example verification
+````java
+Totp totp = new Totp(secret); // library-dependent
+if (!totp.verify(totpCode)) throw new OtpInvalidException("Invalid TOTP");
+````
+
+**Backup codes**
+- Generate N backup codes (10), store hashed in DB.
+- Use each once (mark as used).
+- UI: allow the user to generate new backup codes (invalidate previous).
+
+
+Schema:
+````sql
+CREATE TABLE backup_codes (
+  user_id bigint,
+  code_hash varchar(255),
+  used boolean DEFAULT false
+);
+````
+
+## Remember-device
+- When user checks “remember this device”, create a long-lived device token (opaque) and store hashed token with device metadata (user, device, IP, lastUsed).
+- Set token in `HttpOnly`, `Secure` cookie with long expiry.
+- During login, if device token valid, skip second factor.
+
+**Security**: allow device listing and revoke in user settings.
+
+---
+
+## Extra implementation notes & helpful snippets
+
+### OTP service using Redis (pseudo)
+````java
+String sessionKey = "otp:session:" + sessionId;
+redis.hset(sessionKey, Map.of("user", username, "otp", otp));
+redis.expire(sessionKey, ttl);
+````
+
+### Generating secure random tokens:
+````java
+SecureRandom sr = new SecureRandom();
+byte[] bytes = new byte[32];
+sr.nextBytes(bytes);
+String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes); // refresh token
+````
+
+
+## Example folder map (where to put things)
+````css
+security-module/
+  src/main/java/...
+    auth/
+      AuthService.java
+      controller/AuthController.java
+      strategies/PasswordAuthStrategy.java
+                  PasswordlessAuthStrategy.java
+                  TwoStepAuthStrategy.java
+      jwt/JwtProvider.java
+      otp/OtpService.java
+      audit/AuthAuditService.java
+      rate/RateLimiterService.java   (Redis/Bucket4j)
+      refresh/RefreshTokenService.java
+      totp/TotpService.java
+      exception/RestSecurityExceptionHandler.java
+
+````
+
+## Final recommended priorities (quick rollout)
+1. Implement **audit logging** and call it everywhere.
+2. Add OTP **storage + per-session attempt counters** in Redis (simple).
+3. Add **per-user and per-IP rate limiting** with Redis + exponential backoff.
+4. Add **refresh token** support (opaque, rotating).
+5. Add **TOTP + backup codes** and `PasswordlessAuthStrategy`.
+6. Move secrets to a **vault/KMS**, enable TLS, and use JWKS for key rotation if you need multiple microservices to verify tokens.
