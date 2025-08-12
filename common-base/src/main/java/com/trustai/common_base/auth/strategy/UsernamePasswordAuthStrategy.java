@@ -2,6 +2,7 @@ package com.trustai.common_base.auth.strategy;
 
 import com.trustai.common_base.auth.dto.request.AuthRequest;
 import com.trustai.common_base.auth.dto.response.AuthResponse;
+import com.trustai.common_base.constants.SecurityConstants;
 import com.trustai.common_base.security.jwt.JwtProvider;
 import com.trustai.common_base.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class UsernamePasswordAuthStrategy implements AuthenticationStrategy {
 
         // Authentication succeeded — return username (caller will use it to issue JWT)
         String jwtToken = jwtProvider.generateToken(auth.getName());
-        long expAt = System.currentTimeMillis() + 3600_000; // 1 hour
+        long expAt = System.currentTimeMillis() + SecurityConstants.JWT_EXPIRE_MILLS;
 
         return new AuthResponse(jwtToken, expAt);
     }

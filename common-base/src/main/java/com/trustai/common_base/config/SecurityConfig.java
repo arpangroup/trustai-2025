@@ -1,5 +1,6 @@
 package com.trustai.common_base.config;
 
+import com.trustai.common_base.constants.CommonConstants;
 import com.trustai.common_base.security.jwt.JwtAuthenticationFilter;
 import com.trustai.common_base.security.jwt.JwtProvider;
 import com.trustai.common_base.security.CustomAuthenticationFailureHandler;
@@ -70,7 +71,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/h2-console/**"))
                 //.userDetailsService(inMemory)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**", "/public/**", "/favicon.ico", "/h2-console").permitAll()
+                        .requestMatchers(
+                                "/login",
+                                "/css/**",
+                                "/js/**",
+                                "/public/**",
+                                "/favicon.ico",
+                                "/h2-console",
+                                CommonConstants.IMAGE_PATH + "/**" // "/images/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

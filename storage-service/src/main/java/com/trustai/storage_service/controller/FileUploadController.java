@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,6 +20,12 @@ public class FileUploadController {
     @Autowired
     public FileUploadController(StorageService storageService) {
         this.storageService = storageService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<FileInfo>> listFiles() {
+        List<FileInfo> files = storageService.listAllFiles();
+        return ResponseEntity.ok(files);
     }
 
     @PostMapping("/upload-multiple")

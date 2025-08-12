@@ -1,5 +1,6 @@
 package com.trustai.common_base.auth.service.otp;
 
+import com.trustai.common_base.constants.SecurityConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryOtpService implements OtpService {
 
     private final SecureRandom random = new SecureRandom();
-
-    private static final int OTP_LENGTH = 6;
-    private static final long OTP_TTL_MILLIS = 5 * 60 * 1000; // 5 minutes
 
     // sessionId -> SessionData
     private final Map<String, SessionData> sessions = new ConcurrentHashMap<>();
@@ -84,13 +82,13 @@ public class InMemoryOtpService implements OtpService {
     }
 
     private boolean isExpired(SessionData data) {
-        return Instant.now().toEpochMilli() - data.createdAt() > OTP_TTL_MILLIS;
+        return Instant.now().toEpochMilli() - data.createdAt() > SecurityConstants.OTP_TTL_MILLIS;
     }
 
     private String generateOtp() {
-        int bound = (int) Math.pow(10, OTP_LENGTH);
+        int bound = (int) Math.pow(10, SecurityConstants.OTP_LENGTH);
         int code = random.nextInt(bound);
-        return String.format("%0" + OTP_LENGTH + "d", code);
+        return String.format("%0" + SecurityConstants.OTP_LENGTH + "d", code);
     }
 
     private record SessionData(String username, String otp, String flow, long createdAt) { }

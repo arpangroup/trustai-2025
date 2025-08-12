@@ -7,6 +7,7 @@ import com.trustai.common_base.auth.exception.UnsupportedAuthFlowException;
 import com.trustai.common_base.auth.service.otp.OtpService;
 import com.trustai.common_base.auth.service.otp.OtpSession;
 import com.trustai.common_base.auth.strategy.AuthenticationStrategy;
+import com.trustai.common_base.constants.SecurityConstants;
 import com.trustai.common_base.security.jwt.JwtProvider;
 import com.trustai.common_base.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,6 @@ public class AuthService {
     private final Map<String, AuthenticationStrategy> strategies; // injected by Spring: bean name -> impl
     private final OtpService otpService;
     private final JwtProvider jwtProvider;
-    private final int VALIDITY = 3600_000; // 1 hour expiry
 
     /**
      * Step 1: Start authentication flow (password, passwordless, etc.)
@@ -46,7 +46,7 @@ public class AuthService {
         String token = jwtProvider.generateToken(session.username());
         otpService.invalidateSession(sessionId);
 
-        long expAt = System.currentTimeMillis() + VALIDITY; // 1 hour expiry
+        long expAt = System.currentTimeMillis() + SecurityConstants.JWT_EXPIRE_MILLS; // 1 hour expiry
         return new AuthResponse(token, expAt);
     }
 
@@ -55,7 +55,7 @@ public class AuthService {
      */
     public AuthResponse issueTokenForUsername(String username) {
         String token = jwtProvider.generateToken(username);
-        long expAt = System.currentTimeMillis() + VALIDITY;
+        long expAt = System.currentTimeMillis() + SecurityConstants.JWT_EXPIRE_MILLS;
         return new AuthResponse(token, expAt);
     }
 }

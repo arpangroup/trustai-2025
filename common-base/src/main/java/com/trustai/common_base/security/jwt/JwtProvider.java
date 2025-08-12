@@ -1,5 +1,6 @@
 package com.trustai.common_base.security.jwt;
 
+import com.trustai.common_base.constants.SecurityConstants;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -17,7 +18,7 @@ import java.util.function.Function;
 public class JwtProvider {
     private final SecretKey key;
     private final String issuer;
-    private final long expirationMs;
+    //private final long expirationMs;
     public static final String SECRET = "5367566859703373367639792F423F452848284D6251655468576D5A71347437";
 
     //private static final long EXPIRE_INTERVAL = 1000 * 60 * 30; // 1000 ms (1 second) * 60 = 1 minute × 30 = 30 minutes → 1,800,000 ms
@@ -37,7 +38,7 @@ public class JwtProvider {
                        @Value("${jwt.expiration-ms}") long expirationMs) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.issuer = issuer;
-        this.expirationMs = expirationMs;
+        //this.expirationMs = expirationMs;
     }
 
     public String generateToken(String username) { // Use email as username
@@ -47,7 +48,7 @@ public class JwtProvider {
 
     private String createToken(Map<String, Object> claims, String username) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + expirationMs);
+        Date expiry = new Date(now.getTime() + SecurityConstants.JWT_EXPIRE_MILLS);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)
