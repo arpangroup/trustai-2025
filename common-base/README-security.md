@@ -515,7 +515,7 @@ redis.expire(sessionKey, ttl);
 SecureRandom sr = new SecureRandom();
 byte[] bytes = new byte[32];
 sr.nextBytes(bytes);
-String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes); // refresh token
+String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes); // refresh accessToken
 ````
 
 
@@ -546,3 +546,227 @@ security-module/
 4. Add **refresh token** support (opaque, rotating).
 5. Add **TOTP + backup codes** and `PasswordlessAuthStrategy`.
 6. Move secrets to a **vault/KMS**, enable TLS, and use JWKS for key rotation if you need multiple microservices to verify tokens.
+
+
+---
+
+## "password" Flow (username-password):
+Here’s a swimlane diagram showing your "password" flow step-by-step.
+````plaintext
+User                      Controller                      AuthService                      UsernamePasswordAuthStrategy                    JwtProvider / RefreshTokenService
+ |                             |                                 |                                            |                                        |
+ |  POST /api/auth/accessToken |                                 |                                            |                                        |
+ |  { username, password }     |                                 |                                            |                                        |
+ |---------------------------->|                                 |                                            |                                        |
+ |                             | startAuth(request)              |                                            |                                        |
+ |                             |-------------------------------->|                                            |                                        |
+ |                             |                                 | strategy = "password"                      |                                        |
+ |                             |                                 |-------------------------------------------->|                                        |
+ |                             |                                 |                                            | authenticate(username, password)       |
+ |                             |                                 |                                            |--------------------------------------->|
+ |                             |                                 |                                            |<---------------------------------------|
+ |                             |                                 |                                            | return username                        |
+ |                             |                                 |<--------------------------------------------|                                        |
+ |                             | issueTokenForUsername(username) |                                            |                                        |
+ |                             |-------------------------------->|                                            |                                        |
+ |                             |                                 | TokenPair = jwtProvider.generateToken(u)   |                                        |
+ |                             |                                 |-------------------------------------------->| generate access+refresh JWTs           |
+ |                             |                                 |                                            |--------------------------------------->|
+ |                             |                                 |                                            |<---------------------------------------|
+ |                             |                                 | refreshTokenService.storeToken(u, refresh) |                                        |
+ |                             |                                 |-------------------------------------------->|                                        |
+ |                             |                                 |                                            |<---------------------------------------|
+ |                             |                                 | return AuthResponse(access, refresh, exp)  |                                        |
+ |<----------------------------|                                 |                                            |                                        |
+ |  accessToken, refreshToken  |                                 |                                            |                                        |
+
+````
+
+## `twoStepOtp` or `passwordless` Flow (username-password):
+Here’s the OTP-based flow (e.g., `twoStepOtp` or `passwordless`) starting from the controller.
+````plaintext
+User                           Controller                        AuthService                       OTP-based Strategy                     OtpService / JwtProvider / RefreshTokenService
+ |                                  |                                  |                                        |                                             |
+ |  POST /api/auth/accessToken      |                                  |                                        |                                             |
+ |  { username, flow: "otp" }       |                                  |                                        |                                             |
+ |--------------------------------->|                                  |                                        |                                             |
+ |                                  | startAuth(request)               |                                        |                                             |
+ |                                  |--------------------------------->|                                        |                                             |
+ |                                  |                                  | strategy = "otp"                        |                                             |
+ |                                  |                                  |---------------------------------------->|                                             |
+ |                                  |                                  |                                        | otpService.createSession(username, "otp")    |
+ |                                  |                                  |                                        |--------------------------------------------->|
+ |                                  |                                  |                                        |<---------------------------------------------|
+ |                                  |                                  | return sessionId                        |                                             |
+ |                                  |<---------------------------------|                                        |                                             |
+ |  { sessionId }                   |                                  |                                        |                                             |
+ |<---------------------------------|                                  |                                        |                                             |
+ |                                                                                                               |
+ |  POST /api/auth/verify-otp       |                                  |                                        |                                             |
+ |  { sessionId, otp }              |                                  |                                        |                                             |
+ |--------------------------------->|                                  |                                        |                                             |
+ |                                  | verifyOtpAndIssueToken(...)      |                                        |                                             |
+ |                                  |--------------------------------->|                                        |                                             |
+ |                                  |                                  | otpService.getSession(sessionId)       |                                             |
+ |                                  |                                  |---------------------------------------->|                                             |
+ |                                  |                                  |<----------------------------------------|                                             |
+ |                                  |                                  | otpService.verifyOtp(sessionId, otp)   |                                             |
+ |                                  |                                  |---------------------------------------->|                                             |
+ |                                  |                                  |<----------------------------------------|                                             |
+ |                                  |                                  | jwtProvider.generateToken(username)    |                                             |
+ |                                  |                                  |---------------------------------------->| generate access+refresh JWTs                |
+ |                                  |                                  |                                        |--------------------------------------------->|
+ |                                  |                                  |                                        |<---------------------------------------------|
+ |                                  |                                  | refreshTokenService.storeToken(username, refreshToken) |
+ |                                  |                                  |---------------------------------------->|                                             |
+ |                                  |                                  |<----------------------------------------|                                             |
+ |                                  |                                  | otpService.invalidateSession(sessionId)|                                             |
+ |                                  |                                  |---------------------------------------->|                                             |
+ |                                  |                                  |<----------------------------------------|                                             |
+ |                                  |                                  | return AuthResponse(access, refresh, exp)                                               |
+ |<---------------------------------|                                  |                                        |                                             |
+ | accessToken, refreshToken        |                                  |                                        |                                             |
+
+````
+### What’s Different from Password Flow
+1. Two API calls:
+   - First to `/accessToken` to request OTP (returns `sessionId`).
+   - Second to `/verify-otp` to validate OTP and get tokens.
+2. Tokens are only generated in the second step after OTP validation.
+3. `OtpService` is responsible for session tracking, OTP generation, and verification.
+
+## AuthController → AuthService Flow
+| Step   | Password Flow (`flow=null` or `"password"`)                                                                                                                                                        | OTP-based Flow (`flow="otp"`, `"passwordless"`, etc.)                                                                                                                                 |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1**  | **POST** `/api/auth/accessToken` with `{ username, password }`                                                                                                                                     | **POST** `/api/auth/accessToken` with `{ username, flow:"otp" }`                                                                                                                      |
+| **2**  | `AuthController.token()` calls `authService.startAuth()`                                                                                                                                           | Same — `AuthController.token()` calls `authService.startAuth()`                                                                                                                       |
+| **3**  | Inside `AuthService.startAuth()`:  <br>• Looks up `"password"` strategy. <br>• Calls `UsernamePasswordAuthStrategy.start()`                                                                        | Inside `AuthService.startAuth()`: <br>• Looks up `"otp"` strategy. <br>• Calls `OtpAuthStrategy.start()`                                                                              |
+| **4**  | `UsernamePasswordAuthStrategy.start()` authenticates user with `AuthenticationManager` and **returns username**                                                                                    | `OtpAuthStrategy.start()` creates OTP session in `OtpService` and **returns `sessionId`**                                                                                             |
+| **5**  | `AuthController.token()` sees a `String` username → calls `authService.issueTokenForUsername(username)`                                                                                            | `AuthController.token()` sees a `String` sessionId → returns `{ sessionId }` to client                                                                                                |
+| **6**  | `AuthService.issueTokenForUsername()` calls `jwtProvider.generateToken(username)` → returns `TokenPair` (access+refresh) → stores refresh token via `refreshTokenService` → returns `AuthResponse` | Client sends **second** request: **POST** `/api/auth/verify-otp` with `{ sessionId, otp }`                                                                                            |
+| **7**  | `AuthController.token()` sends response: `{ accessToken, refreshToken, expiresAt }`                                                                                                                | `AuthController.verifyOtp()` calls `authService.verifyOtpAndIssueToken(sessionId, otp)`                                                                                               |
+| **8**  | ✅ Done — user is logged in after **1 request**                                                                                                                                                     | `AuthService.verifyOtpAndIssueToken()` → validates OTP via `OtpService` → generates token via `jwtProvider` → stores refresh token → invalidates OTP session → returns `AuthResponse` |
+| **9**  |                                                                                                                                                                                                    | `AuthController.verifyOtp()` sends `{ accessToken, refreshToken, expiresAt }`                                                                                                         |
+| **10** |                                                                                                                                                                                                    | ✅ Done — user is logged in after **2 requests**                                                                                                                                       |
+
+
+## Visual Diagram
+````plaintext
+PASSWORD FLOW
+(Client) ── POST /accessToken (username+password) ──▶ AuthController
+  │ startAuth("password") ─▶ AuthService ─▶ UsernamePasswordAuthStrategy
+  │    └─ authenticate() OK → return username
+  │ issueTokenForUsername() ─▶ jwtProvider.generateToken()
+  │    └─ store refreshToken → return AuthResponse
+(Client) ◀── { accessToken, refreshToken, expiresAt }
+
+OTP FLOW
+(Client) ── POST /accessToken (username, flow="otp") ──▶ AuthController
+  │ startAuth("otp") ─▶ AuthService ─▶ OtpAuthStrategy
+  │    └─ otpService.createSession() → return sessionId
+(Client) ◀── { sessionId }
+(Client) ── POST /verify-otp (sessionId, otp) ──▶ AuthController
+  │ verifyOtpAndIssueToken() ─▶ AuthService
+  │    └─ otpService.verifyOtp() OK
+  │    └─ jwtProvider.generateToken()
+  │    └─ store refreshToken → invalidate OTP session
+(Client) ◀── { accessToken, refreshToken, expiresAt }
+````
+
+## 1. Login (Password Flow)
+````plaintext
+CLIENT ── POST /api/auth/accessToken
+         { username, password }
+
+AuthController.token()
+  └─ calls AuthService.startAuth()
+        └─ finds "password" strategy → UsernamePasswordAuthStrategy.start()
+             └─ AuthenticationManager.authenticate(username, password)
+             └─ returns username
+  └─ AuthController sees a username → calls AuthService.issueTokenForUsername()
+        └─ jwtProvider.generateToken(username) → returns TokenPair(accessToken, refreshToken)
+        └─ refreshTokenService.storeToken(username, refreshToken)
+        └─ return AuthResponse(accessToken, refreshToken, expiresAt)
+
+CLIENT ◀── { accessToken, refreshToken, expiresAt }
+````
+✅ Single request login.
+
+
+## 2. Login (OTP or Passwordless Flow)
+````plaintext
+CLIENT ── POST /api/auth/accessToken
+         { username, flow:"otp" }
+
+AuthController.token()
+  └─ calls AuthService.startAuth()
+        └─ finds "otp" strategy → OtpAuthStrategy.start()
+             └─ otpService.createSession(username, "otp", maxAttempts)
+             └─ otpService.sendOtp(username)
+             └─ returns sessionId
+  └─ AuthController sees sessionId → returns { sessionId }
+
+CLIENT ◀── { sessionId }
+
+---
+CLIENT ── POST /api/auth/verify-otp
+         { sessionId, otp }
+
+AuthController.verifyOtp()
+  └─ calls AuthService.verifyOtpAndIssueToken()
+        └─ otpService.getSession(sessionId)
+        └─ otpService.verifyOtp(sessionId, otp)
+        └─ jwtProvider.generateToken(username) → returns TokenPair
+        └─ refreshTokenService.storeToken(username, refreshToken)
+        └─ otpService.invalidateSession(sessionId)
+        └─ return AuthResponse(accessToken, refreshToken, expiresAt)
+
+CLIENT ◀── { accessToken, refreshToken, expiresAt }
+````
+
+## 3. Refresh Token Flow
+````plaintext
+CLIENT ── POST /api/auth/refresh
+         { refreshToken }
+
+AuthController.refreshToken()
+  └─ calls AuthService.refreshAccessToken()
+        └─ refreshTokenService.validateAndGetUsername(refreshToken)
+        └─ jwtProvider.generateAccessToken(username)
+        └─ return AuthResponse(newAccessToken, sameRefreshToken, expiresAt)
+
+CLIENT ◀── { accessToken, refreshToken, expiresAt }
+
+````
+
+## Full Lifecycle Diagram
+````plaintext
+[ PASSWORD LOGIN ]
+(Client) → /accessToken (username, password)
+  → AuthService.startAuth → UsernamePasswordAuthStrategy → username
+  → issueTokenForUsername → generateToken+storeRefresh
+(Client) ← { accessToken, refreshToken }
+
+[ OTP LOGIN ]
+(Client) → /accessToken (username, flow="otp")
+  → AuthService.startAuth → OtpAuthStrategy → createSession+sendOtp
+(Client) ← { sessionId }
+(Client) → /verify-otp (sessionId, otp)
+  → verifyOtpAndIssueToken → verifyOtp → generateToken+storeRefresh+invalidate
+(Client) ← { accessToken, refreshToken }
+
+[ REFRESH TOKEN ]
+(Client) → /refresh (refreshToken)
+  → refreshAccessToken → validateRefresh → generateAccessToken
+(Client) ← { accessToken, refreshToken }
+````
+
+
+
+
+
+
+
+
+
+

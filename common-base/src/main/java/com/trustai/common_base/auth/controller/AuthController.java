@@ -11,7 +11,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+/*
+POST /api/auth/accessToken     → starts auth (password or passwordless)
+POST /api/auth/verify-otp      → verifies OTP
+POST /api/auth/refresh         → refresh token
 
+More REST-friendly & self-explanatory naming could be:
+
+POST /api/auth/login           → starts authentication (password or passwordless)
+POST /api/auth/otp/verify      → verifies OTP
+POST /api/auth/token/refresh   → refresh token
+ */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -21,28 +31,29 @@ public class AuthController {
 
     /**
      * Start authentication. Returns either:
-     * - For password flow: returns username (or directly token in other design) — here we return token for simplicity.
+     * - For password flow: returns username (or directly accessToken in other design) — here we return accessToken for simplicity.
      * - For 2-step: returns sessionId which client must use with /verify-otp.
      */
-    @PostMapping("/token")
+    @PostMapping("/accessToken") // accessToken
     public ResponseEntity<?> token(@RequestBody AuthRequest request) {
-        Object res = authService.startAuth(request);
-        if (res instanceof String) {
-            // For password flow our UsernamePasswordAuthStrategy returns username; issue token immediately
-            if ("password".equals(request.flow()) || request.flow() == null) {
-                return ResponseEntity.ok(authService.issueTokenForUsername((String) res));
-            } else {
-                // 2-step returns sessionId
-                return ResponseEntity.ok(Map.of("sessionId", res));
-            }
-        }
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(authService.startAuth(request));
     }
 
     @PostMapping("/verify-otp")
     public ResponseEntity<AuthResponse> verifyOtp(@RequestBody OtpVerifyRequest req) {
-        var resp = authService.verifyOtpAndIssueToken(req.getSessionId(), req.getOtp());
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(authService.verifyOtpAndIssueToken(req.getSessionId(), req.getOtp()));
+    }
+
+    /**
+     * Refresh token endpoint: given refreshToken, issue a new access token.
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(authService.refreshAccessToken(refreshToken));
     }
 
 

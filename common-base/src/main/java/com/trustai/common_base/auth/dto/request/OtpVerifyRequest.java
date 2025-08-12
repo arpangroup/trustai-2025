@@ -6,5 +6,5 @@ import lombok.Data;
 public class OtpVerifyRequest {
     private String username;
     private String otp;
-    private String sessionId; // optional session token returned from start flow
+    private String sessionId; // optional session accessToken returned from start flow
 }

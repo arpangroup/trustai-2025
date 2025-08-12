@@ -1,7 +1,6 @@
-package com.trustai.common_base.auth.dto.response;
+package com.trustai.common_base.auth.dto;
 
-
-public record AuthResponse(
+public record TokenPair(
         String accessToken,
         String refreshToken,
         long accessTokenExpiry,

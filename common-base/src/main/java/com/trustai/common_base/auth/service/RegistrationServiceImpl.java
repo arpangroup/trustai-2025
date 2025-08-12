@@ -64,7 +64,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         log.info("Generating verificationCode for email: {}", email);
         VerificationToken token = registrationHelper.prepareVerificationCode(email);
         tokenRepo.save(token);
-        log.info("verification token for email: {} saved successfully", email);
+        log.info("verification accessToken for email: {} saved successfully", email);
 
         // Send email with code
         String subject = "Your Email Verification Code";
@@ -80,13 +80,13 @@ public class RegistrationServiceImpl implements RegistrationService {
         log.info("verifyEmail for email: {}, otp: {}", request.getEmail(), request.getOtp());
         RegistrationProgress progress = progressRepo.findByEmail(request.email).orElseThrow(() -> new AuthException("No registration in progress"));
 
-        log.info("Verify token.....");
-        VerificationToken token = tokenRepo.findByTypeAndTarget(VerificationType.EMAIL, request.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid or expired token"));
+        log.info("Verify accessToken.....");
+        VerificationToken token = tokenRepo.findByTypeAndTarget(VerificationType.EMAIL, request.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid or expired accessToken"));
         if (token.isVerified()) throw new IllegalArgumentException("Email already verified");
         if (!token.getCode().equals(request.otp)) throw new IllegalArgumentException("Invalid verification code");
         if (token.getExpiresAt().isBefore(LocalDateTime.now())) throw new IllegalArgumentException("Verification code expired");
 
-        log.info("token verified for email: {}", request.getEmail());
+        log.info("accessToken verified for email: {}", request.getEmail());
         token.setVerified(true);
         tokenRepo.save(token);
 
@@ -111,7 +111,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         progress.setRegistrationCompleted(true);
         progressRepo.save(progress);
-        //tokenRepo.delete(token); // Optionally delete after successful registration
+        //tokenRepo.delete(accessToken); // Optionally delete after successful registration
     }
 
     private User doRegister(User user, String referralCode) {

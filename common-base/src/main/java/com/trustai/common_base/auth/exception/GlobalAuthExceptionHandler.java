@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice(basePackages = "com.trustai.common_base")
-public class SecurityExceptionHandler {
+public class GlobalAuthExceptionHandler {
 
     @ExceptionHandler({BadCredentialsException.class, UnsupportedAuthFlowException.class})
     public ResponseEntity<Map<String, Object>> handleSecurityAuthExceptions(RuntimeException ex) {

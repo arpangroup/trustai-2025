@@ -1,8 +1,10 @@
 package com.trustai.common_base.auth.strategy;
 
+import com.trustai.common_base.auth.dto.TokenPair;
 import com.trustai.common_base.auth.dto.request.AuthRequest;
 import com.trustai.common_base.auth.dto.response.AuthResponse;
-import com.trustai.common_base.constants.SecurityConstants;
+import com.trustai.common_base.auth.exception.BadCredentialsException;
+import com.trustai.common_base.auth.service.RefreshTokenService;
 import com.trustai.common_base.security.jwt.JwtProvider;
 import com.trustai.common_base.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -18,18 +20,32 @@ import org.springframework.stereotype.Component;
 public class UsernamePasswordAuthStrategy implements AuthenticationStrategy {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
     private final CustomUserDetailsService userDetailsService;
 
     @Override
     public Object start(AuthRequest request) {
-        var token = new UsernamePasswordAuthenticationToken(request.username(), request.password());
-        var auth = authenticationManager.authenticate(token);
+        try {
+            // Authenticate using username & password
+            var authToken = new UsernamePasswordAuthenticationToken(request.username(), request.password());
+            var auth = authenticationManager.authenticate(authToken); // throws if invalid
+        } catch (org.springframework.security.authentication.BadCredentialsException ex) {
+            throw new BadCredentialsException("Invalid username or password");
+        }
 
-        // Authentication succeeded — return username (caller will use it to issue JWT)
-        String jwtToken = jwtProvider.generateToken(auth.getName());
-        long expAt = System.currentTimeMillis() + SecurityConstants.JWT_EXPIRE_MILLS;
+        // Generate token pair
+        TokenPair tokens = jwtProvider.generateToken(request.username());
 
-        return new AuthResponse(jwtToken, expAt);
+        // Store refresh token with expiry
+        refreshTokenService.storeToken(request.username(), tokens.refreshToken(), tokens.refreshTokenExpiry());
+
+        // Return complete AuthResponse (access + refresh + expiry)
+        return new AuthResponse(
+                tokens.accessToken(),
+                tokens.refreshToken(),
+                tokens.accessTokenExpiry(),
+                tokens.refreshTokenExpiry()
+        );
     }
 }
