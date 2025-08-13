@@ -7,6 +7,6 @@ public class SecurityConstants {
 
     public static final int OTP_LENGTH = 6;
     public static final long OTP_TTL_MILLIS = 5 * 60 * 1000;  // 5 minutes
-    public static final long ACCESS_TOKEN_VALIDITY_MS  = 2 * 60 * 1000; // 2 minutes
-    public static final long REFRESH_TOKEN_VALIDITY_MS = 5 * 60 * 1000; // 5 minutes
+    public static final long ACCESS_TOKEN_VALIDITY_MS  = 30 * 60 * 1000; // 30 minutes
+    public static final long REFRESH_TOKEN_VALIDITY_MS = 60 * 60 * 1000; // 60 minutes
 }
