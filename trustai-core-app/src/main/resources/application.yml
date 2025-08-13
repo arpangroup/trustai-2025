@@ -27,6 +27,11 @@ spring:
       name: admin
       password: password
       roles: ADMIN
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false  # Important to prevent static fallback
 
 feign:
   client:

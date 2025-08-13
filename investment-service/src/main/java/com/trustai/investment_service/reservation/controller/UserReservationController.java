@@ -21,6 +21,18 @@ public class UserReservationController extends BaseController {
     private final StakeReservationService reservationService;
 
     /**
+     * Get active (visible) reservations of the user.
+     */
+    @GetMapping
+    public ResponseEntity<List<UserReservationDto>> getActiveReservations() {
+        Long userId = getCurrentUserId();
+        log.info("Fetching active reservations for userId: {}", userId);
+        List<UserReservationDto> reservations = reservationService.getActiveReservations(userId);
+        log.info("Retrieved {} active reservations for userId: {}", reservations.size(), userId);
+        return ResponseEntity.ok(reservations);
+    }
+
+    /**
      * Reserve a stake/schema for today.
      */
     @PostMapping("/reserve")
@@ -46,15 +58,5 @@ public class UserReservationController extends BaseController {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * Get active (visible) reservations of the user.
-     */
-    @GetMapping("/active")
-    public ResponseEntity<List<UserReservationDto>> getActiveReservations(@RequestParam Long userId) {
-        log.info("Fetching active reservations for userId: {}", userId);
-        List<UserReservationDto> reservations = reservationService.getActiveReservations(userId);
-        log.info("Retrieved {} active reservations for userId: {}", reservations.size(), userId);
-        return ResponseEntity.ok(reservations);
-    }
 
 }
