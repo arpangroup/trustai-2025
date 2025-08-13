@@ -1,14 +1,19 @@
 package com.trustai.common_base.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestClient;
 
 @Configuration
 @Slf4j
 public class RestClientConfig {
+
+    @Value("${security.auth.internal-token}")
+    private String internalToken;
 
     private ClientHttpRequestInterceptor loggingInterceptor() {
         return (request, body, execution) -> {
@@ -38,6 +43,7 @@ public class RestClientConfig {
 //                    log.info("Outgoing request: {} {}", request.getMethod(), request.getURI());
 //                    return execution.execute(request, body);
 //                })
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + internalToken)
                 .requestInterceptor(loggingInterceptor())
                 .requestInterceptor(loggingResponseInterceptor())
                 .build();
@@ -47,6 +53,7 @@ public class RestClientConfig {
     public RestClient v1ApiRestClient(RestClient.Builder builder) {
         return builder
                 .baseUrl("http://localhost:8080/api/v1")
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + internalToken)
                 .requestInterceptor(loggingInterceptor())
                 .requestInterceptor(loggingResponseInterceptor())
                 .build();

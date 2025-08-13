@@ -1,11 +1,13 @@
 package com.trustai.common_base.config;
 
 import com.trustai.common_base.constants.CommonConstants;
-import com.trustai.common_base.security.jwt.JwtAuthenticationFilter;
+import com.trustai.common_base.security.filter.InternalTokenAuthFilter;
+import com.trustai.common_base.security.filter.JwtAuthenticationFilter;
 import com.trustai.common_base.security.jwt.JwtProvider;
 import com.trustai.common_base.security.CustomAuthenticationFailureHandler;
 import com.trustai.common_base.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -28,6 +30,9 @@ public class SecurityConfig {
     private final com.trustai.trustai_common.security.AuthEntryPoint unauthorizedHandler;
     private final CustomAuthenticationFailureHandler failureHandler ; // centralize error handle for form base login
 
+    @Value("${security.auth.internal-token}")
+    private String internalToken;
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
@@ -43,6 +48,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProvider, userDetailsService);
+        InternalTokenAuthFilter internalTokenAuthFilter = new InternalTokenAuthFilter(internalToken);
 
         http
                 .securityMatcher("/api/**")
@@ -54,7 +60,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                // Order is important: check internal token before JWT
+                // The order of these two lines matters — whichever you call last will run first. So to run internalTokenAuthFilter before JWT, make sure it’s added after JWT:
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(internalTokenAuthFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

@@ -1,5 +1,6 @@
-package com.trustai.common_base.security.jwt;
+package com.trustai.common_base.security.filter;
 
+import com.trustai.common_base.security.jwt.JwtProvider;
 import com.trustai.common_base.security.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
