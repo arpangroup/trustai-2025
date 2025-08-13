@@ -20,11 +20,11 @@ public class Role {
 
     // e.g. ROLE_USER, ROLE_ADMIN
     @Column(nullable = false, unique = true)
-    private String code;
+    private String name;
 
     private String description;
 
-    public Role(String code) {
-        this.code = code;
+    public Role(String name) {
+        this.name = name;
     }
 }

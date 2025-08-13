@@ -77,7 +77,7 @@ public class JwtProvider {
         claims.put("mobile", user.getMobile());
         claims.put("iss", "trustai"); // Issuer
         claims.put("tbk", "202508131309"); // "Token Booked Key" or "Transaction Booking Key"
-        claims.put("roles", user.getRoles().stream().map(Role::getCode).toList());
+        claims.put("roles", user.getRoles().stream().map(Role::getName).toList());
         claims.put("deviceId", "e3484127e56f0631debb988798267fd5");
 
         return claims;
