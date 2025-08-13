@@ -1,3 +1,6 @@
+## Spring Security JWT design
+
+
 ## ❓ Q1: What is the purpose of `AuthenticationEntryPoint`?
 🅰️: `AuthenticationEntryPoint` is used to handle unauthorized access **when no authentication is provided**. It is triggered when a request is made to a protected resource without valid credentials (e.g., missing or expired JWT). It typically returns a `401 Unauthorized` response.
 

@@ -23,4 +23,8 @@ public class Role {
     private String code;
 
     private String description;
+
+    public Role(String code) {
+        this.code = code;
+    }
 }

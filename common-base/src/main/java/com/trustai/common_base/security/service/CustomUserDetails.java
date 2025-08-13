@@ -21,13 +21,14 @@ public class CustomUserDetails implements UserDetails {
     private final User.AccountStatus accountStatus;
     private final String email;
     private final String mobile;
+    private final Set<Role> roles;
 
     public CustomUserDetails(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.enabled = user.getAccountStatus() == User.AccountStatus.ACTIVE;
-        Set<Role> roles = user.getRoles() != null ? user.getRoles() : Collections.emptySet();
+        this.roles = user.getRoles() != null ? user.getRoles() : Collections.emptySet();
         this.authorities = roles.stream()
                 .map(Role::getCode)
                 .map(SimpleGrantedAuthority::new)

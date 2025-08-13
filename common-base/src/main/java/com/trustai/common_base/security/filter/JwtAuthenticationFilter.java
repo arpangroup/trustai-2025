@@ -6,14 +6,15 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
@@ -34,22 +35,57 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = extractToken(request);
             if (token != null && jwtProvider.validateToken(token)) {
-                String username = jwtProvider.extractUsername(token);
-                var userDetails = userDetailsService.loadUserByUsername(username);
+                // load the userDetails from DB
+                /*String username = jwtProvider.extractUsername(token);
+                var userDetails = userDetailsService.loadUserByUsername(username);*/
 
-                //var authentication = SecurityUtils.createAuthentication(userDetails);
-                //SecurityContextHolder.getContext().setAuthentication(authentication);
+                // no DB call required, directly get userDetails from JWT Token
+                var userDetails   = jwtProvider.loadFromJwt(token);
 
-                var auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                var auth = new UsernamePasswordAuthenticationToken(
+                    userDetails.getUsername(),      // principal = username
+                    null,                           // credentials
+                    userDetails.getAuthorities()    // authorities
+                );
+                //auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                auth.setDetails(userDetails);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         } catch (Exception ex) {
+            log.warn("JWT authentication failed: {}", ex.getMessage());
             // skip setting security context — AuthEntryPoint will handle unauthorized responses
         }
 
         filterChain.doFilter(request, response);
     }
+
+    /*@Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
+        try {
+            String token = extractToken(request);
+            if (token != null && jwtProvider.validateToken(token)) {
+
+                // Use JWT claims to build CustomUserDetails
+                CustomUserDetails userDetails = jwtProvider.loadFromJwt(token);
+
+                // Set authentication
+                var auth = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+        } catch (Exception ex) {
+            // Skip setting security context; AuthEntryPoint will handle unauthorized responses
+        }
+
+        filterChain.doFilter(request, response);
+    }*/
 
     private String extractToken(HttpServletRequest req) {
         String bearerHeader = req.getHeader("Authorization");
