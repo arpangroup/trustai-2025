@@ -24,7 +24,10 @@ public class InvestmentController extends BaseController {
     private final InvestmentService investmentService;
 
     @GetMapping
-    public ResponseEntity<Page<UserInvestmentSummary>> getInvestments(@RequestParam(required = false) InvestmentStatus status, Pageable pageable) {
+    public ResponseEntity<Page<UserInvestmentSummary>> getInvestments(
+            @RequestParam(required = false) InvestmentStatus status,
+            Pageable pageable
+    ) {
         Long userId = getCurrentUserId(); // From token
         if (isAdmin()) {
             return ResponseEntity.ok(investmentService.getAllInvestments(status, pageable));

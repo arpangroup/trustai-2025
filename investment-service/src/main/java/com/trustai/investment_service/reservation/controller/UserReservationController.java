@@ -1,5 +1,6 @@
 package com.trustai.investment_service.reservation.controller;
 
+import com.trustai.common_base.controller.BaseController;
 import com.trustai.investment_service.reservation.dto.ReservationRequest;
 import com.trustai.investment_service.reservation.dto.UserReservationDto;
 import com.trustai.investment_service.reservation.entity.UserReservation;
@@ -16,7 +17,7 @@ import java.util.List;
 @RequestMapping("/api/v1/reservations")
 @RequiredArgsConstructor
 @Slf4j
-public class UserReservationController {
+public class UserReservationController extends BaseController {
     private final StakeReservationService reservationService;
 
     /**
@@ -24,8 +25,9 @@ public class UserReservationController {
      */
     @PostMapping("/reserve")
     public ResponseEntity<UserReservation> autoReserve(@RequestBody @Valid ReservationRequest request) {
-        log.info("Received reserve request - userId: {}, schemaId: {}, amount: {}", request.getUserId(), request.getSchemaId(), request.getAmount());
-        UserReservation reservation = reservationService.autoReserve(request.getUserId());
+        Long userId = getCurrentUserId();
+        log.info("Received reserve request - userId: {}, schemaId: {}, amount: {}", userId, request.getSchemaId(), request.getAmount());
+        UserReservation reservation = reservationService.autoReserve(userId);
         log.info("Reservation successful - reservationId: {}", reservation.getId());
         return ResponseEntity.ok(reservation);
     }
@@ -35,9 +37,9 @@ public class UserReservationController {
      */
     @PostMapping("/{reservationId}/sell")
     public ResponseEntity<Void> sellReservation(
-            @PathVariable Long reservationId,
-            @RequestParam Long userId
+            @PathVariable Long reservationId
     ) {
+        Long userId = getCurrentUserId();
         log.info("Received sell request - reservationId: {}, userId: {}", reservationId, userId);
         reservationService.sellReservation(reservationId, userId);
         log.info("Sell successful - reservationId: {}, userId: {}", reservationId, userId);
