@@ -23,10 +23,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .or(() -> userRepo.findByEmail(usernameOrEmail))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + usernameOrEmail));*/
         User user = new User("admin");
-        user.setEmail("john@doe.com");
+        user.setEmail("john123@doe.com");
         user.setMobile("9812345678");
         user.setFirstname("John");
-        user.setId(123L);
+        user.setId(1L);
         user.setRoles(Set.of(new Role("user")));
         user.setPassword("$2a$12$dokOUjkyRo.YhTOBdmcEUuh82sf4vRcd1BnmcRu18K7vSCd5d4B.S");
         return new CustomUserDetails(user);

@@ -15,10 +15,6 @@ public class InvestmentRequest {
     @Positive(message = "planId schemaId")
     private Long schemaId;
 
-    @NotNull(message = "userId is required")
-    @Positive(message = "invalid userId")
-    private Long userId;
-
     @NotNull(message = "amount is required")
     @DecimalMin(value = "0.01", inclusive = true, message = "amount must be at least 0.01")
     private BigDecimal amount;
