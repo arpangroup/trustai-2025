@@ -5,7 +5,7 @@ import com.trustai.common_base.constants.SecurityConstants;
 import com.trustai.common_base.domain.user.Role;
 import com.trustai.common_base.domain.user.User;
 import com.trustai.common_base.security.service.CustomUserDetailsService;
-import com.trustai.trustai_common.security.service.CustomUserDetails;
+import com.trustai.common_base.security.service.CustomUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

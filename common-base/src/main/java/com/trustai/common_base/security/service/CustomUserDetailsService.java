@@ -1,16 +1,12 @@
 package com.trustai.common_base.security.service;
 
-import com.trustai.common_base.domain.user.Role;
 import com.trustai.common_base.domain.user.User;
 import com.trustai.common_base.repository.user.UserRepository;
-import com.trustai.trustai_common.security.service.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor

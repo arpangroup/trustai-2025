@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -23,7 +22,6 @@ public class IncomeHistoryController extends BaseController {
     private final IncomeHistoryService incomeHistoryService;
 
     // 1. Summary
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/summary")
     public ResponseEntity<List<IncomeSummaryProjection>> getIncomeSummary() {
         Long userId = getCurrentUserId();

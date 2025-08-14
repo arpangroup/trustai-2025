@@ -30,7 +30,7 @@ public class TwoStepOtpAuthStrategy implements AuthenticationStrategy {
 
         /*
         // 4) generate and send OTP to user's preferred destination (email or mobile)
-        var user = (com.trustai.trustai_common.security.service.CustomUserDetails) userDetailsService.loadUserByUsername(request.getUsername());
+        var user = (com.trustai.common_base.security.service.CustomUserDetails) userDetailsService.loadUserByUsername(request.getUsername());
         String destination = user.getEmail(); // or mobile if prefer mobile
         String sessionId = otpService.generateAndSend(request.getUsername(), destination);
         return sessionId;

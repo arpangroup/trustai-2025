@@ -1,6 +1,6 @@
 package com.trustai.common_base.security;
 
-import com.trustai.trustai_common.security.service.CustomUserDetails;
+import com.trustai.common_base.security.service.CustomUserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;

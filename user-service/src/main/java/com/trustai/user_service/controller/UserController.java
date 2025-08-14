@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -61,7 +60,6 @@ public class UserController extends BaseController {
         return ResponseEntity.ok(mapper.mapToDetails(user));
     }*/
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/info")
     public ResponseEntity<UserDetailsInfo> getUserInfoDetails() {
         Long userId = getCurrentUserId();

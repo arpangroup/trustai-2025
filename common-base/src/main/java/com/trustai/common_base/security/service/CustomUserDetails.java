@@ -1,4 +1,4 @@
-package com.trustai.trustai_common.security.service;
+package com.trustai.common_base.security.service;
 
 import com.trustai.common_base.domain.user.Role;
 import com.trustai.common_base.domain.user.User;

@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import com.trustai.trustai_common.security.service.CustomUserDetails;
+import com.trustai.common_base.security.service.CustomUserDetails;
 
 public abstract class BaseController {
     @Autowired
