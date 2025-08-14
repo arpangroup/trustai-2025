@@ -9,6 +9,7 @@ import com.trustai.common_base.dto.RankConfigDto;
 import com.trustai.common_base.dto.UserHierarchyDto;
 import com.trustai.common_base.dto.UserInfo;
 import com.trustai.common_base.dto.WalletUpdateRequest;
+import com.trustai.common_base.enums.IncomeType;
 import com.trustai.income_service.income.entity.IncomeHistory;
 import com.trustai.income_service.income.repository.IncomeHistoryRepository;
 import com.trustai.income_service.income.repository.TeamIncomeConfigRepository;
@@ -75,7 +76,7 @@ public class IncomeDistributionServiceTest {
         IncomeHistory savedIncome = IncomeHistory.builder()
                 .userId(sellerId)
                 .amount(new BigDecimal("30.00"))
-                .incomeType(IncomeHistory.IncomeType.DAILY)
+                .incomeType(IncomeType.DAILY)
                 .sourceUserId(sellerId)
                 .sourceUserRank(sellerRank)
                 .note("Self income")
@@ -96,7 +97,7 @@ public class IncomeDistributionServiceTest {
         // Then
         verify(incomeRepo).save(argThat(income ->
                 income.getUserId().equals(sellerId)
-                        && income.getIncomeType() == IncomeHistory.IncomeType.DAILY
+                        && income.getIncomeType() == IncomeType.DAILY
                         && income.getAmount().compareTo(new BigDecimal("30.00")) == 0
         ));
 

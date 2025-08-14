@@ -9,6 +9,7 @@ import com.trustai.common_base.dto.RankConfigDto;
 import com.trustai.common_base.dto.UserHierarchyDto;
 import com.trustai.common_base.dto.UserInfo;
 import com.trustai.common_base.dto.WalletUpdateRequest;
+import com.trustai.common_base.enums.IncomeType;
 import com.trustai.common_base.enums.TransactionType;
 import com.trustai.income_service.constant.Remarks;
 import com.trustai.income_service.income.dto.UplineIncomeLog;
@@ -60,7 +61,7 @@ public class IncomeDistributionService {
         IncomeHistory incomeHistory = IncomeHistory.builder()
                 .userId(sellerId)
                 .amount(dailyIncome)
-                .incomeType(IncomeHistory.IncomeType.DAILY)
+                .incomeType(IncomeType.DAILY)
                 .sourceUserId(sellerId)
                 .sourceUserRank(sellerRank)
                 .note(Remarks.DAILY_INCOME) // Self income

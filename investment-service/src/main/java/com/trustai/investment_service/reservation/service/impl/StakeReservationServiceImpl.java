@@ -4,9 +4,11 @@ import com.trustai.common_base.api.IncomeApi;
 import com.trustai.common_base.api.RankConfigApi;
 import com.trustai.common_base.api.UserApi;
 import com.trustai.common_base.api.WalletApi;
+import com.trustai.common_base.dto.IncomeSummaryDto;
 import com.trustai.common_base.dto.TransactionDto;
 import com.trustai.common_base.dto.UserInfo;
 import com.trustai.common_base.dto.WalletUpdateRequest;
+import com.trustai.common_base.enums.IncomeType;
 import com.trustai.common_base.enums.TransactionType;
 import com.trustai.common_base.event.StakeSoldEvent;
 import com.trustai.common_base.exceptions.ErrorCode;
@@ -55,12 +57,16 @@ public class StakeReservationServiceImpl implements StakeReservationService {
     public ReservationSummary getReservationSummary(Long userId) {
         log.info("Retrieving reservation info for userId: {}", userId);
         var userInfo = userApi.getUserById(userId);
-        var incomeSummary = incomeApi.getIncomeSummary(userId);
+        List<IncomeSummaryDto> incomeSummary = incomeApi.getIncomeSummary(userId);
+
+        var todayIncome = incomeSummary.stream().filter(i -> i.getIncomeType() == IncomeType.DAILY).findFirst().get();
+        var teamIncome = incomeSummary.stream().filter(i -> i.getIncomeType() == IncomeType.TEAM).findFirst().get();
 
         return ReservationSummary.builder()
-                .todayEarning(BigDecimal.ZERO)
-                .cumulativeIncome(BigDecimal.ZERO)
-                .teamIncome(BigDecimal.ZERO)
+                .todayEarning(todayIncome.getTodayAmount())
+                .cumulativeIncome(todayIncome.getTotalAmount())
+                .todayTeamIncome(teamIncome.getTodayAmount())
+                .totalTeamIncome(teamIncome.getTotalAmount())
                 .reservationRange(new ReservationSummary.ReservationRange(BigDecimal.ONE, new BigDecimal("5000")))
                 .reservedCount(1)
                 .walletBalance(userInfo.getWalletBalance())

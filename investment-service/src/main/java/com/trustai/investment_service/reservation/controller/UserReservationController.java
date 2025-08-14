@@ -49,9 +49,7 @@ public class UserReservationController extends BaseController {
      * Sell a reservation.
      */
     @PostMapping("/{reservationId}/sell")
-    public ResponseEntity<Void> sellReservation(
-            @PathVariable Long reservationId
-    ) {
+    public ResponseEntity<Void> sellReservation(@PathVariable Long reservationId) {
         Long userId = getCurrentUserId();
         log.info("Received sell request - reservationId: {}, userId: {}", reservationId, userId);
         reservationService.sellReservation(reservationId, userId);

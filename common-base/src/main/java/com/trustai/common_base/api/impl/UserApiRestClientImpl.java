@@ -48,7 +48,7 @@ public class UserApiRestClientImpl implements UserApi {
                     .retrieve()
                     //.body(new ParameterizedTypeReference<List<UserInfo>>() {});
                     .body(UserInfo[].class);
-                    return Arrays.asList(users);
+            return Arrays.asList(users);
         });
     }
 

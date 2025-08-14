@@ -6,6 +6,7 @@ import com.trustai.common_base.api.UserApi;
 import com.trustai.common_base.api.WalletApi;
 import com.trustai.common_base.dto.UserInfo;
 import com.trustai.common_base.dto.WalletUpdateRequest;
+import com.trustai.common_base.enums.IncomeType;
 import com.trustai.common_base.enums.TransactionType;
 import com.trustai.income_service.constant.Remarks;
 import com.trustai.income_service.income.dto.UplineIncomeLog;
@@ -57,7 +58,7 @@ public class DefaultTeamIncomeStrategy implements TeamIncomeStrategy {
                 IncomeHistory incomeHistory = incomeHistoryRepo.save(IncomeHistory.builder()
                         .userId(upline.getId())
                         .amount(teamIncome)
-                        .incomeType(IncomeHistory.IncomeType.TEAM)
+                        .incomeType(IncomeType.TEAM)
                         .sourceUserId(sourceUserId)
                         .sourceUserRank(sourceUserRank)
                         .note("Team income")

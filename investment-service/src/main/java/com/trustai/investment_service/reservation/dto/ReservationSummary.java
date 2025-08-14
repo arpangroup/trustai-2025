@@ -11,7 +11,8 @@ import java.util.List;
 public class ReservationSummary {
     private BigDecimal todayEarning;
     private BigDecimal cumulativeIncome;
-    private BigDecimal teamIncome;
+    private BigDecimal todayTeamIncome;
+    private BigDecimal totalTeamIncome;
     private ReservationRange reservationRange;
     private int reservedCount;
     private BigDecimal walletBalance;

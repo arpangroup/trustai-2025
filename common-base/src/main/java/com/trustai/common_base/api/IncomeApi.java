@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 
 public interface IncomeApi {
-    IncomeSummaryDto getIncomeSummary(Long userId);
+    List<IncomeSummaryDto> getIncomeSummary(Long userId);
 }

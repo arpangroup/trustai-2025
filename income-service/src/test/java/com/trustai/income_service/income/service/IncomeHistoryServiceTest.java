@@ -30,10 +30,10 @@ Mocked repository return from incomeRepo.findIncomeSummaryByUserId(userId, ...):
 ⚙️ Expected Behavior:
  */
 @ExtendWith(MockitoExtension.class)
-public class UserIncomeServiceTest {
+public class IncomeHistoryServiceTest {
 
     @InjectMocks
-    private UserIncomeService service;
+    private IncomeHistoryService service;
 
     @Mock
     private IncomeHistoryRepository incomeRepo;
