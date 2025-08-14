@@ -61,7 +61,7 @@ public class UserController extends BaseController {
         return ResponseEntity.ok(mapper.mapToDetails(user));
     }*/
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/info")
     public ResponseEntity<UserDetailsInfo> getUserInfoDetails() {
         Long userId = getCurrentUserId();
