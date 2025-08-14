@@ -1,6 +1,7 @@
 package com.trustai.common_base.config;
 
 import com.trustai.common_base.constants.CommonConstants;
+import com.trustai.common_base.security.CustomAccessDeniedHandler;
 import com.trustai.common_base.security.filter.InternalTokenAuthFilter;
 import com.trustai.common_base.security.filter.JwtAuthenticationFilter;
 import com.trustai.common_base.security.jwt.JwtProvider;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,12 +25,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtProvider jwtProvider;
     private final com.trustai.trustai_common.security.AuthEntryPoint unauthorizedHandler;
     private final CustomAuthenticationFailureHandler failureHandler ; // centralize error handle for form base login
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Value("${security.auth.internal-token}")
     private String internalToken;
@@ -54,7 +58,10 @@ public class SecurityConfig {
                 .securityMatcher("/api/**")
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(e -> e.authenticationEntryPoint(unauthorizedHandler))
+                .exceptionHandling(e -> e.
+                        authenticationEntryPoint(unauthorizedHandler)   // 401 handler
+                        .accessDeniedHandler(customAccessDeniedHandler) // <-- 403 handler
+                )
                 //.authenticationProvider(daoProvider) // keep this if not globally registered
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()

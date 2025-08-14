@@ -1,5 +1,6 @@
 package com.trustai.user_service.controller;
 
+import com.trustai.common_base.controller.BaseController;
 import com.trustai.common_base.domain.user.User;
 import com.trustai.common_base.dto.UserDetailsInfo;
 import com.trustai.common_base.dto.UserInfo;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -22,7 +24,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Slf4j
-public class UserController {
+public class UserController extends BaseController {
     private final UserProfileService userService;
     private final UserAccountService userAccountService;
     private final RegistrationService registrationService;
@@ -50,8 +52,19 @@ public class UserController {
         return ResponseEntity.ok(paginatedUsers);
     }
 
+    /*
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{userId}")
     public ResponseEntity<UserDetailsInfo> getUserInfoDetails(@PathVariable Long userId) {
+        log.info("getUserInfo for User ID: {}......", userId);
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(mapper.mapToDetails(user));
+    }*/
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/info")
+    public ResponseEntity<UserDetailsInfo> getUserInfoDetails() {
+        Long userId = getCurrentUserId();
         log.info("getUserInfo for User ID: {}......", userId);
         User user = userService.getUserById(userId);
         return ResponseEntity.ok(mapper.mapToDetails(user));
