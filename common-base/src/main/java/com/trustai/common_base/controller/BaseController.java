@@ -1,5 +1,6 @@
 package com.trustai.common_base.controller;
 
+import com.trustai.common_base.constants.CommonConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -41,7 +42,7 @@ public abstract class BaseController {
     }
 
     private Long getActingUserIdFromHeader() {
-        String actingUserId = request.getHeader("X-Acting-User-Id");
+        String actingUserId = request.getHeader(CommonConstants.HEADER_ACTING_USER_ID);
         if (actingUserId == null || actingUserId.isBlank()) {
             throw new IllegalArgumentException("Missing acting user ID for internal call");
         }

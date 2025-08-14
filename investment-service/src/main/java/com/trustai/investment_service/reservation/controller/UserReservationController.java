@@ -2,6 +2,7 @@ package com.trustai.investment_service.reservation.controller;
 
 import com.trustai.common_base.controller.BaseController;
 import com.trustai.investment_service.reservation.dto.ReservationRequest;
+import com.trustai.investment_service.reservation.dto.ReservationSummary;
 import com.trustai.investment_service.reservation.dto.UserReservationDto;
 import com.trustai.investment_service.reservation.entity.UserReservation;
 import com.trustai.investment_service.reservation.service.StakeReservationService;
@@ -56,6 +57,15 @@ public class UserReservationController extends BaseController {
         reservationService.sellReservation(reservationId, userId);
         log.info("Sell successful - reservationId: {}, userId: {}", reservationId, userId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<ReservationSummary> reservationSummary() {
+        Long userId = getCurrentUserId();
+        log.info("Fetching reservation info for userId: {}", userId);
+        ReservationSummary reservationSummary = reservationService.getReservationSummary(userId);
+        log.info("Retrieved reservation summary for userId: {}", userId);
+        return ResponseEntity.ok(reservationSummary);
     }
 
 

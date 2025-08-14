@@ -1,6 +1,6 @@
 package com.trustai.income_service.income.service;
 
-import com.trustai.income_service.income.dto.UserIncomeSummaryDto;
+import com.trustai.income_service.income.dto.UserIncomeSummary;
 import com.trustai.income_service.income.entity.IncomeHistory;
 import com.trustai.income_service.income.repository.IncomeHistoryRepository;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ public class UserIncomeServiceTest {
         when(incomeRepo.findIncomeSummaryByUserId(anyLong(), any()))
                 .thenReturn(List.of(row1, row2));
 
-        List<UserIncomeSummaryDto> result = service.getUserIncomeSummary(1L);
+        List<UserIncomeSummary> result = service.getUserIncomeSummary(1L);
 
         assertEquals(3, result.size());
 
@@ -74,25 +74,25 @@ public class UserIncomeServiceTest {
                 .thenReturn(List.of(dailyRow1, dailyRow2, teamRow));
 
         // When
-        List<UserIncomeSummaryDto> result = service.getUserIncomeSummary(123L);
+        List<UserIncomeSummary> result = service.getUserIncomeSummary(123L);
 
         // Then
         assertEquals(3, result.size());
 
         // 1. DAILY → "Comprehensive", 5.00 + 7.50 = 12.50, 50.00 + 60.00 = 110.00
-        UserIncomeSummaryDto comprehensive = result.get(0);
+        UserIncomeSummary comprehensive = result.get(0);
         assertEquals("Comprehensive", comprehensive.type());
         assertEquals(new BigDecimal("12.50"), comprehensive.dailyIncome());
         assertEquals(new BigDecimal("110.00"), comprehensive.totalIncome());
 
         // 2. Hardcoded "Reserve" → 1.30 fixed
-        UserIncomeSummaryDto reserve = result.get(1);
+        UserIncomeSummary reserve = result.get(1);
         assertEquals("Reserve", reserve.type());
         assertEquals(new BigDecimal("1.30"), reserve.dailyIncome());
         assertEquals(new BigDecimal("1.30"), reserve.totalIncome());
 
         // 3. TEAM → "Team", 2.00 daily, 30.00 total
-        UserIncomeSummaryDto team = result.get(2);
+        UserIncomeSummary team = result.get(2);
         assertEquals("Team", team.type());
         assertEquals(new BigDecimal("2.00"), team.dailyIncome());
         assertEquals(new BigDecimal("30.00"), team.totalIncome());

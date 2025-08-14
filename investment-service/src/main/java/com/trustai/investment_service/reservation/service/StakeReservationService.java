@@ -1,5 +1,6 @@
 package com.trustai.investment_service.reservation.service;
 
+import com.trustai.investment_service.reservation.dto.ReservationSummary;
 import com.trustai.investment_service.reservation.dto.UserReservationDto;
 import com.trustai.investment_service.reservation.entity.UserReservation;
 
@@ -7,6 +8,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface StakeReservationService {
+    ReservationSummary getReservationSummary(Long userId);
+
     /**
      * Aut-Reserve a stake for the user. Only one reservation per day is allowed.
      *
@@ -45,4 +48,5 @@ public interface StakeReservationService {
      * Expire all reservations that have passed their expiry time and are still unsold.
      */
     void expireUnclaimedReservations();
+
 }

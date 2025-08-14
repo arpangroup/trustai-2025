@@ -1,6 +1,6 @@
 package com.trustai.income_service.income.service;
 
-import com.trustai.income_service.income.dto.UserIncomeSummaryDto;
+import com.trustai.income_service.income.dto.UserIncomeSummary;
 import com.trustai.income_service.income.entity.IncomeHistory;
 import com.trustai.income_service.income.repository.IncomeHistoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,6 @@ import java.time.LocalDate;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -49,11 +48,11 @@ public class UserIncomeService {
         ).toList();
     }*/
 
-    public List<UserIncomeSummaryDto> getUserIncomeSummary(Long userId) {
+    public List<UserIncomeSummary> getUserIncomeSummary(Long userId) {
         List<Object[]> rawResults = incomeRepo.findIncomeSummaryByUserId(userId, LocalDate.now());
 
         // Aggregate income by type
-        Map<IncomeHistory.IncomeType, UserIncomeSummaryDto> summaryMap = new EnumMap<>(IncomeHistory.IncomeType.class);
+        Map<IncomeHistory.IncomeType, UserIncomeSummary> summaryMap = new EnumMap<>(IncomeHistory.IncomeType.class);
 
         for (Object[] row : rawResults) {
             IncomeHistory.IncomeType type = (IncomeHistory.IncomeType) row[0];
@@ -61,8 +60,8 @@ public class UserIncomeService {
             BigDecimal totalIncome = (BigDecimal) row[2];
 
             summaryMap.merge(type,
-                    new UserIncomeSummaryDto(getLabel(type), dailyIncome, totalIncome),
-                    (existing, incoming) -> new UserIncomeSummaryDto(
+                    new UserIncomeSummary(getLabel(type), dailyIncome, totalIncome),
+                    (existing, incoming) -> new UserIncomeSummary(
                             existing.type(),
                             existing.dailyIncome().add(incoming.dailyIncome()),
                             existing.totalIncome().add(incoming.totalIncome())
@@ -72,9 +71,9 @@ public class UserIncomeService {
 
         // Add hardcoded "Reserve" income in the middle
         return List.of(
-                summaryMap.getOrDefault(IncomeHistory.IncomeType.DAILY, new UserIncomeSummaryDto("Comprehensive", BigDecimal.ZERO, BigDecimal.ZERO)),
-                new UserIncomeSummaryDto("Reserve", new BigDecimal("1.30"), new BigDecimal("1.30")),
-                summaryMap.getOrDefault(IncomeHistory.IncomeType.TEAM, new UserIncomeSummaryDto("Team", BigDecimal.ZERO, BigDecimal.ZERO))
+                summaryMap.getOrDefault(IncomeHistory.IncomeType.DAILY, new UserIncomeSummary("Comprehensive", BigDecimal.ZERO, BigDecimal.ZERO)),
+                new UserIncomeSummary("Reserve", new BigDecimal("1.30"), new BigDecimal("1.30")),
+                summaryMap.getOrDefault(IncomeHistory.IncomeType.TEAM, new UserIncomeSummary("Team", BigDecimal.ZERO, BigDecimal.ZERO))
         );
     }
 

@@ -1,5 +1,7 @@
 package com.trustai.investment_service.reservation.service.impl;
 
+import com.trustai.common_base.api.IncomeApi;
+import com.trustai.common_base.api.RankConfigApi;
 import com.trustai.common_base.api.UserApi;
 import com.trustai.common_base.api.WalletApi;
 import com.trustai.common_base.dto.TransactionDto;
@@ -11,12 +13,12 @@ import com.trustai.common_base.exceptions.ErrorCode;
 import com.trustai.common_base.exceptions.ValidationException;
 import com.trustai.common_base.utils.DateUtils;
 import com.trustai.investment_service.entity.InvestmentSchema;
-import com.trustai.investment_service.enums.InvestmentStatus;
 import com.trustai.investment_service.repository.SchemaRepository;
+import com.trustai.investment_service.reservation.dto.ReservationSummary;
 import com.trustai.investment_service.reservation.dto.UserReservationDto;
 import com.trustai.investment_service.reservation.entity.UserReservation;
 import com.trustai.investment_service.reservation.mapper.UserReservationMapper;
-import com.trustai.investment_service.reservation.repository.StakeReservationRepository;
+import com.trustai.investment_service.reservation.repository.UserReservationRepository;
 import com.trustai.investment_service.reservation.service.StakeReservationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,16 +39,33 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class StakeReservationServiceImpl implements StakeReservationService {
-    private final StakeReservationRepository reservationRepository;
+    private final UserReservationRepository reservationRepository;
     private final SchemaRepository schemaRepository;
     private final UserReservationMapper mapper;
     private final UserApi userApi;
     private final WalletApi walletApi;
+    private final IncomeApi incomeApi;
     private final ApplicationEventPublisher eventPublisher;
 
     @Value("${investment.stake.valuationDelta}")
     private BigDecimal stakeValuationDelta;
 
+
+    @Override
+    public ReservationSummary getReservationSummary(Long userId) {
+        log.info("Retrieving reservation info for userId: {}", userId);
+        var userInfo = userApi.getUserById(userId);
+        var incomeSummary = incomeApi.getIncomeSummary(userId);
+
+        return ReservationSummary.builder()
+                .todayEarning(BigDecimal.ZERO)
+                .cumulativeIncome(BigDecimal.ZERO)
+                .teamIncome(BigDecimal.ZERO)
+                .reservationRange(new ReservationSummary.ReservationRange(BigDecimal.ONE, new BigDecimal("5000")))
+                .reservedCount(1)
+                .walletBalance(userInfo.getWalletBalance())
+                .build();
+    }
 
     /**
      * Automatically reserves a stake for a given user based on available schemas.

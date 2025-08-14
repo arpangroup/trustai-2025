@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface StakeReservationRepository extends JpaRepository<UserReservation, Long> {
+public interface UserReservationRepository extends JpaRepository<UserReservation, Long> {
     boolean existsByUserIdAndReservationDate(Long userId, LocalDate reservationDate);
 
     List<UserReservation> findByUserIdAndIsSoldFalseAndExpiryAtAfter(Long userId, LocalDateTime now);
