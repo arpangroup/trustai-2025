@@ -144,6 +144,22 @@ public class User {
         this.id = id;
     }
 
+    public boolean isActive() {
+        return this.accountStatus == AccountStatus.ACTIVE;
+    }
+
+    public String getFullName() {
+        if (firstname != null && lastname != null) {
+            return firstname + " " + lastname;
+        } else if (firstname != null) {
+            return firstname;
+        } else if (lastname != null) {
+            return lastname;
+        } else {
+            return username;
+        }
+    }
+
     /*
                     --> DISABLED
                    |

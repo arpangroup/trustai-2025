@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -55,6 +52,26 @@ public class IncomeHistoryService {
         }
 
         return completeList;
+    }
+
+    /*
+        BigDecimal totalShare = incomeHistoryService.sumShare(allDownlineIds, startDate, endDate);
+        BigDecimal level1Share = incomeHistoryService.sumShare(level1Ids, startDate, endDate);
+        BigDecimal level2Share = incomeHistoryService.sumShare(level2Ids, startDate, endDate);
+        BigDecimal level3Share = incomeHistoryService.sumShare(level3Ids, startDate, endDate);
+    */
+    public Map<Long, BigDecimal> getUserShares(List<Long> userIds, @Nullable LocalDateTime start, @Nullable LocalDateTime end) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Object[]> results = incomeHistoryRepository.sumSharesByUserIdsAndDateRange(userIds, start, end);
+
+        return results.stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (BigDecimal) row[1]
+                ));
     }
 
     public Page<IncomeHistory> getIncomeDetails(

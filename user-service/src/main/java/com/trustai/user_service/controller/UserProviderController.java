@@ -6,7 +6,7 @@ import com.trustai.common_base.dto.UserMetrics;
 import com.trustai.common_base.repository.user.UserRepository;
 import com.trustai.user_service.hierarchy.UserHierarchy;
 import com.trustai.user_service.hierarchy.repository.UserHierarchyRepository;
-import com.trustai.user_service.hierarchy.service.UserMetricsService;
+import com.trustai.user_service.hierarchy.service.MemberSummaryService;
 import com.trustai.user_service.user.exception.IdNotFoundException;
 import com.trustai.user_service.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.List;
 public class UserProviderController {
     private final UserRepository userRepository;
     private final UserHierarchyRepository userHierarchyRepository;
-    private final UserMetricsService userMetricsService;
+    private final MemberSummaryService memberSummaryService;
     private final UserMapper mapper;
 
     @GetMapping("/users")
@@ -100,7 +100,7 @@ public class UserProviderController {
     @GetMapping("/users/{userId}/metrics")
     public UserMetrics computeMetrics(@PathVariable Long userId) {
         log.info("findByDescendant for userId: {}", userId);
-        return userMetricsService.computeMetrics(userId);
+        return memberSummaryService.computeMetrics(userId);
     }
 
     @GetMapping("/hierarchy/descendant/{descendant}")

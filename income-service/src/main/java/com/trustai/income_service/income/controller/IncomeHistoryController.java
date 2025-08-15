@@ -12,8 +12,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/incomes")
@@ -39,5 +42,17 @@ public class IncomeHistoryController extends BaseController {
         Long userId = getCurrentUserId();
         return ResponseEntity.ok(incomeHistoryService.getIncomeDetails(userId, startDate, endDate, incomeType, pageable));
     }
+
+    @PostMapping("/user-shares")
+    public ResponseEntity<Map<Long, BigDecimal>> getSumShare(
+            @RequestBody List<Long> userIds,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDate
+    ) {
+        Map<Long, BigDecimal> userShares = incomeHistoryService.getUserShares(userIds, startDate, endDate);
+        return ResponseEntity.ok(userShares);
+    }
+
+
 
 }

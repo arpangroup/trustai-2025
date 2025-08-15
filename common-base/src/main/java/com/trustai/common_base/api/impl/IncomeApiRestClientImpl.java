@@ -6,11 +6,15 @@ import com.trustai.common_base.dto.IncomeSummaryDto;
 import com.trustai.common_base.dto.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static com.trustai.common_base.utils.RestCallHandler.handleRestCall;
 
@@ -37,4 +41,36 @@ public class IncomeApiRestClientImpl implements IncomeApi {
             return Arrays.asList(incomes);
         });
     }
+
+    @Override
+    public Map<Long, BigDecimal> getUserShares(List<Long> userIds, LocalDateTime startDate, LocalDateTime endDate) {
+        log.info("Calling getUserShares with userIds: {}, startDate: {}, endDate: {}", userIds, startDate, endDate);
+        return handleRestCall(() -> {
+            return restClient.post()
+                    .uri(uriBuilder -> {
+                        var builder = uriBuilder.path("/incomes/user-shares");
+                        if (startDate != null) {
+                            builder.queryParam("startDate", startDate.toString());
+                        }
+                        if (endDate != null) {
+                            builder.queryParam("endDate", endDate.toString());
+                        }
+                        return builder.build();
+                    })
+                    .body(userIds)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<Map<Long, BigDecimal>>() {});
+        });
+    }
 }
+
+/*
+return handleRestCall(() -> {
+            UserInfo[] response = restClient.post()
+                    .uri("/users/by-ids")
+                    .body(userIds)
+                    .retrieve()
+                    .body(UserInfo[].class);
+                    return Arrays.asList(response);
+        });
+ */

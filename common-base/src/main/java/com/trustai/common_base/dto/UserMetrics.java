@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 @Data
 @Builder
 public class UserMetrics {
-    private int directReferrals;
+    private int directReferrals;            // direct
     private BigDecimal totalDeposit;
     private BigDecimal totalInvestment;
     private BigDecimal walletBalance;
