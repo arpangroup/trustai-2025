@@ -44,9 +44,10 @@ public interface UserRepository extends BaseRepository<User, Long> {
           AND (:startDate IS NULL OR u.createdAt >= :startDate)
           AND (:endDate IS NULL OR u.createdAt <= :endDate)
     """)
-    List<User> findByIdsAndDateRange(@Param("ids") List<Long> ids,
-                                     @Param("startDate") LocalDateTime startDate,
-                                     @Param("endDate") LocalDateTime endDate);
+    List<User> findByIdsAndDateRange(
+            @Param("ids") List<Long> ids,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 
     /*
     @Query("SELECT u.depositBalance FROM User u WHERE u.id = :userId")

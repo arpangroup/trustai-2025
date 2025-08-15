@@ -155,8 +155,9 @@ public class MemberSummaryService {
             }
         }
 
-        return MemberSummaryResponse.builder()
-                .totalUser(allIds.size())
+        Set<Long> filteredIds = new HashSet<>(userMap.keySet());
+        /*return MemberSummaryResponse.builder()
+                .totalUser(filteredIds.size()) // allIds.size() is wrong
                 .totalActive((int) users.stream().filter(User::isActive).count())
 
                 .direct(downlinesByLevel.getOrDefault(1, List.of()).size())
@@ -166,6 +167,27 @@ public class MemberSummaryService {
                 .activeIndirect(countActive(users, downlinesByLevel.getOrDefault(2, List.of())))
 
                 .third(downlinesByLevel.getOrDefault(3, List.of()).size())
+                .activeThird(countActive(users, downlinesByLevel.getOrDefault(3, List.of())))
+
+                .totalShare(memberA.add(memberB).add(memberC))
+                .memberA(memberA)
+                .memberB(memberB)
+                .memberC(memberC)
+
+                .memembers(contributions)
+                .build();*/
+
+        return MemberSummaryResponse.builder()
+                .totalUser(filteredIds.size())
+                .totalActive((int) users.stream().filter(User::isActive).count())
+
+                .direct((int) downlinesByLevel.getOrDefault(1, List.of()).stream().filter(filteredIds::contains).count())
+                .activeDirect(countActive(users, downlinesByLevel.getOrDefault(1, List.of())))
+
+                .indirect((int) downlinesByLevel.getOrDefault(2, List.of()).stream().filter(filteredIds::contains).count())
+                .activeIndirect(countActive(users, downlinesByLevel.getOrDefault(2, List.of())))
+
+                .third((int) downlinesByLevel.getOrDefault(3, List.of()).stream().filter(filteredIds::contains).count())
                 .activeThird(countActive(users, downlinesByLevel.getOrDefault(3, List.of())))
 
                 .totalShare(memberA.add(memberB).add(memberC))

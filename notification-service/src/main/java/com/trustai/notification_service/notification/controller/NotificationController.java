@@ -33,7 +33,6 @@ public class NotificationController {
     // 2️⃣ Get paginated notifications
     @GetMapping
     public Page<InAppNotificationDto> getNotifications(
-            @RequestParam String userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
