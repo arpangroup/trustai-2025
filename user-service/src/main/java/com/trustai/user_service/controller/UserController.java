@@ -52,7 +52,6 @@ public class UserController extends BaseController {
     }
 
     /*
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{userId}")
     public ResponseEntity<UserDetailsInfo> getUserInfoDetails(@PathVariable Long userId) {
         log.info("getUserInfo for User ID: {}......", userId);
@@ -61,11 +60,11 @@ public class UserController extends BaseController {
     }*/
 
     @GetMapping("/info")
-    public ResponseEntity<UserDetailsInfo> getUserInfoDetails() {
+    public ResponseEntity<UserInfo> getUserInfo() {
         Long userId = getCurrentUserId();
         log.info("getUserInfo for User ID: {}......", userId);
         User user = userService.getUserById(userId);
-        return ResponseEntity.ok(mapper.mapToDetails(user));
+        return ResponseEntity.ok(mapper.mapTo(user));
     }
 
     @PatchMapping("/{userId}")

@@ -28,6 +28,8 @@ public class User {
     @Column(unique = true, nullable = false, length = 100)
     private String email;
     private String mobile;
+    private String image;
+    private int point = 100;
 
     // Balance Related....................
     @Column(name = "wallet_balance", precision = 19, scale = 4)
@@ -87,6 +89,8 @@ public class User {
     private Set<Role> roles;
 
 
+
+
     /*
     private String mobile;
 
@@ -101,7 +105,6 @@ public class User {
     private int dailyAdLimit;
 
     private Address addressDetails;
-    private String image;
 
     private int status;
 

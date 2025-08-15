@@ -7,6 +7,8 @@ import com.trustai.common_base.utils.PhoneMaskingUtil;
 import com.trustai.user_service.user.entity.Kyc;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 public class UserMapper {
     /*public UserInfoOld mapTo(User user) {
@@ -30,6 +32,8 @@ public class UserMapper {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .rankCode(user.getRankCode())
+                .point(user.getPoint())
+                .image(user.getImage())
                 // Balance:
                 .walletBalance(user.getWalletBalance())
                 .profitBalance(user.getProfitBalance())
@@ -70,23 +74,23 @@ public class UserMapper {
     }
 
     private AccountStatus convert(User user) {
-        Kyc kyc = getKycInfo(user);
+        //Kyc kyc = getKycInfo(user);
         return AccountStatus.builder()
                 .isAccountActive(user.getAccountStatus() == User.AccountStatus.ACTIVE)
-                .isKycVerified(kyc.status == Kyc.KycStatus.VERIFIED)
-                .isEmailVerified(kyc.getEmailVerifyStatus() == Kyc.EpaStatus.VERIFIED)
-                .isPhoneVerified(kyc.getPhoneVerifyStatus() == Kyc.EpaStatus.VERIFIED)
+                //.isKycVerified(kyc.status == Kyc.KycStatus.VERIFIED)
+                //.isEmailVerified(kyc.getEmailVerifyStatus() == Kyc.EpaStatus.VERIFIED)
+                //.isPhoneVerified(kyc.getPhoneVerifyStatus() == Kyc.EpaStatus.VERIFIED)
 
                 .isDepositEnabled(user.depositStatus == User.TransactionStatus.ENABLED)
                 .isWithdrawEnabled(user.withdrawStatus == User.TransactionStatus.ENABLED)
                 .isSendMoneyEnabled(user.sendMoneyStatus == User.TransactionStatus.ENABLED)
 
                 .accountStatus(user.accountStatus.name())
-                .kycStatus(kyc.status.name())
-                .emailVerifyStatus(kyc.getEmailVerifyStatus().name())
-                .phoneVerifyStatus(kyc.getPhoneVerifyStatus().name())
+                //.kycStatus(kyc.status.name())
+                //.emailVerifyStatus(kyc.getEmailVerifyStatus().name())
+                //.phoneVerifyStatus(kyc.getPhoneVerifyStatus().name())
 
-                .kycRejectionReason(kyc.getKycRejectionReason())
+                //.kycRejectionReason(kyc.getKycRejectionReason())
                 .build();
     }
 

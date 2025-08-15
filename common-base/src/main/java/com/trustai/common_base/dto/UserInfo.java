@@ -16,6 +16,8 @@ public class UserInfo {
     private String username;
     private String email;
     private String rankCode;
+    private int point;
+    private String image;
     // Balance
     private BigDecimal walletBalance;
     private BigDecimal profitBalance;
