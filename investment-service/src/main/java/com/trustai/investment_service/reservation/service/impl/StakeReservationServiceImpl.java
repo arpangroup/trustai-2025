@@ -3,12 +3,10 @@ package com.trustai.investment_service.reservation.service.impl;
 import com.trustai.common_base.api.IncomeApi;
 import com.trustai.common_base.api.UserApi;
 import com.trustai.common_base.api.WalletApi;
-import com.trustai.common_base.dto.IncomeSummaryDto;
-import com.trustai.common_base.dto.TransactionDto;
-import com.trustai.common_base.dto.UserInfo;
-import com.trustai.common_base.dto.WalletUpdateRequest;
+import com.trustai.common_base.dto.*;
 import com.trustai.common_base.enums.IncomeType;
 import com.trustai.common_base.enums.TransactionType;
+import com.trustai.common_base.event.NotificationEvent;
 import com.trustai.common_base.event.StakeSoldEvent;
 import com.trustai.common_base.exceptions.ErrorCode;
 import com.trustai.common_base.exceptions.ValidationException;
@@ -27,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Primary;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -58,17 +57,23 @@ public class StakeReservationServiceImpl implements StakeReservationService {
         var userInfo = userApi.getUserById(userId);
         List<IncomeSummaryDto> incomeSummary = incomeApi.getIncomeSummary(userId);
 
-        var todayIncome = incomeSummary.stream().filter(i -> i.getIncomeType() == IncomeType.DAILY).findFirst().get();
+        var dailyIncome = incomeSummary.stream().filter(i -> i.getIncomeType() == IncomeType.DAILY).findFirst().get();
         var teamIncome = incomeSummary.stream().filter(i -> i.getIncomeType() == IncomeType.TEAM).findFirst().get();
+        int totalOrders = dailyIncome.getTotalOrders();
+        int processingOrders = dailyIncome.getProcessingOrders();
 
         return ReservationSummary.builder()
-                .todayEarning(todayIncome.getTodayAmount())
-                .cumulativeIncome(todayIncome.getTotalAmount())
+                .todayEarning(dailyIncome.getTodayAmount())
+                .cumulativeIncome(dailyIncome.getTotalAmount())
                 .todayTeamIncome(teamIncome.getTodayAmount())
                 .totalTeamIncome(teamIncome.getTotalAmount())
                 .reservationRange(new ReservationSummary.ReservationRange(BigDecimal.ONE, new BigDecimal("5000")))
                 .reservedCount(1)
                 .walletBalance(userInfo.getWalletBalance())
+                .totalOrders(totalOrders)
+                .processingOrders(processingOrders)
+                .boughtOrders(processingOrders)
+                .soldOrders(totalOrders - processingOrders)
                 .build();
     }
 
@@ -136,6 +141,7 @@ public class StakeReservationServiceImpl implements StakeReservationService {
         UserReservation savedReservation = reservationRepository.save(reservation);
         log.info("Reservation created successfully - reservationId: {}, userId: {}", savedReservation.getId(), userId);
 
+        sendReservationNotification(userId, reservation);
         return savedReservation;
     }
 
@@ -154,18 +160,18 @@ public class StakeReservationServiceImpl implements StakeReservationService {
      * Sells an existing reservation by marking it as sold and setting the sold timestamp.
      * Future implementation can include profit calculation.
      *
-     * @param reservationId ID of the reservation to sell
-     * @param userId        User who owns the reservation
+     * @param orderId ID of the reservation to sell
+     * @param userId  User who owns the reservation
      */
     @Override
-    public void sellReservation(Long reservationId, Long userId) {
-        log.info("Attempting to sell reservation - reservationId: {}, userId: {}", reservationId, userId);
+    public void sellReservation(Long orderId, Long userId) {
+        log.info("Attempting to sell reservation - orderId: {}, userId: {}", orderId, userId);
 
         // Step 1: Fetch active (unsold) reservation for the given user
         UserReservation reservation = reservationRepository
-                .findByIdAndUserIdAndIsSoldFalse(reservationId, userId)
+                .findByIdAndUserIdAndIsSoldFalse(orderId, userId)
                 .orElseThrow(() -> {
-                    log.warn("Sell failed - reservation not found or already sold. reservationId: {}, userId: {}", reservationId, userId);
+                    log.warn("Sell failed - reservation not found or already sold. reservationId: {}, userId: {}", orderId, userId);
                     throw new ValidationException("Reservation not found or already sold.", ErrorCode.RESERVATION_NOT_FOUND_OR_SOLD );
                 });
 
@@ -192,11 +198,12 @@ public class StakeReservationServiceImpl implements StakeReservationService {
 
         // Step 5: Persist updated reservation
         reservationRepository.save(reservation);
-        log.info("Reservation marked as sold - reservationId: {}, userId: {}, reservedAmount: {}, gain: {}", reservationId, userId, reservedAmount, realizedGain);
+        log.info("Reservation marked as sold - orderId: {}, userId: {}, reservedAmount: {}, gain: {}", orderId, userId, reservedAmount, realizedGain);
 
         // Step 6: Publish StakeSoldEvent for downstream processing (e.g., income accrual)
         eventPublisher.publishEvent(new StakeSoldEvent(userId, reservedAmount));
         log.info("Published StakeSoldEvent for userId: {}, reservedAmount: {}", userId, reservedAmount);
+        sendSaleNotification(userId, reservation, soldAmount);
     }
 
 
@@ -207,15 +214,21 @@ public class StakeReservationServiceImpl implements StakeReservationService {
      * @return List of active reservation DTOs
      */
     @Override
-    public List<UserReservationDto> getActiveReservations(Long userId) {
-        log.info("Fetching active reservations - userId: {}", userId);
-        List<UserReservation> activeReservations = reservationRepository
-                .findByUserIdAndIsSoldFalseAndExpiryAtAfter(userId, LocalDateTime.now());
+    public List<UserReservationDto> getReservations(Long userId, boolean activeOnly, LocalDate startDate, LocalDate endDate) {
+        log.info("Fetching {} reservations for userId: {}, startDate: {}, endDate: {}",
+                activeOnly ? "active" : "all", userId, startDate, endDate);
 
-        List<UserReservationDto> dtos =  activeReservations.stream()
+        List<UserReservation> reservations;
+        if (activeOnly) {
+            reservations = reservationRepository.findByUserIdAndIsSoldFalseAndExpiryAtAfter(userId, LocalDateTime.now());
+        } else {
+            reservations = reservationRepository.findAllReservationsWithOptionalDateRange(userId, startDate, endDate);
+        }
+
+        List<UserReservationDto> dtos = reservations.stream()
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
-        log.info("Found {} active reservations for userId: {}", dtos.size(), userId);
+        log.info("Found {} {} reservations for userId: {}", dtos.size(), activeOnly ? "active" : "total", userId);
         return dtos;
     }
 
@@ -274,4 +287,39 @@ public class StakeReservationServiceImpl implements StakeReservationService {
     }
 
 
+    private void sendReservationNotification(Long userId, UserReservation reservation) {
+        String title = "Your investment stake has been reserved!";
+        String message = String.format(
+                "You successfully reserved a stake worth %s (Reservation ID: %d). Your investment is now active. Check your portfolio for details.",
+                reservation.getReservedAmount().toPlainString(),
+                reservation.getId()
+        );
+
+        publishInAppNotification(userId, title, message);
+    }
+
+    private void sendSaleNotification(Long userId, UserReservation reservation, BigDecimal soldAmount) {
+        String title = "Your stake has been successfully sold!";
+        String message = String.format(
+                "You earned a total of %s from your stake (Reservation ID: %d). Check your wallet for details.",
+                soldAmount.toPlainString(),
+                reservation.getId()
+        );
+
+        publishInAppNotification(userId, title, message);
+    }
+
+
+    @Async
+    private void publishInAppNotification(Long userId, String title, String message) {
+        eventPublisher.publishEvent(
+                new NotificationEvent(this,
+                        NotificationRequest.forInApp(
+                                String.valueOf(userId),
+                                title,
+                                message
+                        )
+                )
+        );
+    }
 }

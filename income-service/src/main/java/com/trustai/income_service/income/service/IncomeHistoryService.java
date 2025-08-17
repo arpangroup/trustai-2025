@@ -47,6 +47,8 @@ public class IncomeHistoryService {
                     public BigDecimal getYesterdayAmount() { return BigDecimal.ZERO; }
                     public BigDecimal getLast7DaysAmount() { return BigDecimal.ZERO; }
                     public BigDecimal getTotalAmount() { return BigDecimal.ZERO; }
+                    public Long getTotalOrders() { return 0L; }
+                    public Long getProcessingOrders() { return 0L; }
                 });
             }
         }

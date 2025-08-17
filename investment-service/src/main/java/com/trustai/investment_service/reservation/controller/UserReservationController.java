@@ -9,13 +9,15 @@ import com.trustai.investment_service.reservation.service.StakeReservationServic
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/reservations")
+@RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 @Slf4j
 public class UserReservationController extends BaseController {
@@ -25,11 +27,20 @@ public class UserReservationController extends BaseController {
      * Get active (visible) reservations of the user.
      */
     @GetMapping
-    public ResponseEntity<List<UserReservationDto>> getActiveReservations() {
+    public ResponseEntity<List<UserReservationDto>> getOrders(
+            @RequestParam(value = "activeOnly", required = false, defaultValue = "false") boolean activeOnly,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate  end
+    ) {
         Long userId = getCurrentUserId();
-        log.info("Fetching active reservations for userId: {}", userId);
-        List<UserReservationDto> reservations = reservationService.getActiveReservations(userId);
-        log.info("Retrieved {} active reservations for userId: {}", reservations.size(), userId);
+        log.info("Fetching {} reservations for userId: {} between {} and {}",
+                activeOnly ? "active" : "all", userId, start, end);
+        List<UserReservationDto> reservations = reservationService.getReservations(userId, activeOnly, start, end);
+
+        log.info("Retrieved {} {} reservations for userId: {}",
+                reservations.size(),
+                activeOnly ? "active" : "total",
+                userId);
         return ResponseEntity.ok(reservations);
     }
 
@@ -48,12 +59,12 @@ public class UserReservationController extends BaseController {
     /**
      * Sell a reservation.
      */
-    @PostMapping("/{reservationId}/sell")
-    public ResponseEntity<Void> sellReservation(@PathVariable Long reservationId) {
+    @PostMapping("/{orderId}/sell")
+    public ResponseEntity<Void> sellReservation(@PathVariable Long orderId) {
         Long userId = getCurrentUserId();
-        log.info("Received sell request - reservationId: {}, userId: {}", reservationId, userId);
-        reservationService.sellReservation(reservationId, userId);
-        log.info("Sell successful - reservationId: {}, userId: {}", reservationId, userId);
+        log.info("Received sell request - orderId: {}, userId: {}", orderId, userId);
+        reservationService.sellReservation(orderId, userId);
+        log.info("Sell successful - orderId: {}, userId: {}", orderId, userId);
         return ResponseEntity.ok().build();
     }
 

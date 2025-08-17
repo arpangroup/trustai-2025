@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 //@JsonInclude(JsonInclude.Include.NON_NULL) // Only this field will be excluded if null
 public class UserInfo {
     private Long id;
+    private String accountId;
     private String username;
     private String email;
     private String rankCode;

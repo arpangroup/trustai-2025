@@ -1,6 +1,6 @@
 package com.trustai.notification_service.notification.strategy.impl;
 
-import com.trustai.notification_service.notification.enums.NotificationChannel;
+import com.trustai.common_base.enums.NotificationChannel;
 import com.trustai.notification_service.notification.service.EmailService;
 import com.trustai.notification_service.notification.strategy.NotificationStrategy;
 import lombok.RequiredArgsConstructor;

@@ -10,4 +10,6 @@ public interface IncomeSummaryProjection {
     BigDecimal getYesterdayAmount();
     BigDecimal getLast7DaysAmount();
     BigDecimal getTotalAmount();
+    Long getTotalOrders();
+    Long getProcessingOrders();
 }

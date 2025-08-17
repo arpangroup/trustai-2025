@@ -3,6 +3,7 @@ package com.trustai.user_service.user.mapper;
 import com.trustai.common_base.domain.user.User;
 import com.trustai.common_base.dto.*;
 import com.trustai.common_base.utils.DateUtils;
+import com.trustai.common_base.utils.IdConverter;
 import com.trustai.common_base.utils.PhoneMaskingUtil;
 import com.trustai.user_service.user.entity.Kyc;
 import org.springframework.stereotype.Component;
@@ -27,8 +28,10 @@ public class UserMapper {
     }*/
 
     public UserInfo mapTo(User user) {
+        String accountId = IdConverter.encode(user.getId());
         return UserInfo.builder()
                 .id(user.getId())
+                .accountId(accountId)
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .rankCode(user.getRankCode())
@@ -50,6 +53,7 @@ public class UserMapper {
 
     public UserDetailsInfo mapToDetails(User user) {
         final User referrer = user.getReferrer();
+        String referrerId = IdConverter.encode(referrer.getId());
         return UserDetailsInfo.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -62,7 +66,7 @@ public class UserMapper {
                 .profitBalance(user.getProfitBalance())
                 // Referral:
                 .referralCode(user.getReferralCode())
-                .referrer(referrer == null ? null : new UserInfo(referrer.getId(), referrer.getUsername()))
+                .referrer(referrer == null ? null : new UserInfo(user.getId(), referrer.getUsername()))
                 .rankCode(user.getRankCode())
                 // KYC:
                 //.kyc(convert(user.getKycInfo()))

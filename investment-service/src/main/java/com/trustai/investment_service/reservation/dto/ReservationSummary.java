@@ -16,6 +16,10 @@ public class ReservationSummary {
     private ReservationRange reservationRange;
     private int reservedCount;
     private BigDecimal walletBalance;
+    private int totalOrders;
+    private int processingOrders;
+    private int boughtOrders;
+    private int soldOrders;
 
     public record ReservationRange(BigDecimal startPrice, BigDecimal endPrice){};
 }

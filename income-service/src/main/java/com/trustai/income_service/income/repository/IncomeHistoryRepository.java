@@ -22,7 +22,9 @@ public interface IncomeHistoryRepository extends JpaRepository<IncomeHistory, Lo
                SUM(CASE WHEN DATE(ih.created_at) = CURRENT_DATE THEN ih.amount ELSE 0 END) AS todayAmount,
                SUM(CASE WHEN DATE(ih.created_at) = CURRENT_DATE - INTERVAL 1 DAY THEN ih.amount ELSE 0 END) AS yesterdayAmount,
                SUM(CASE WHEN DATE(ih.created_at) >= CURRENT_DATE - INTERVAL 7 DAY THEN ih.amount ELSE 0 END) AS last7DaysAmount,
-               SUM(ih.amount) AS totalAmount
+               SUM(ih.amount) AS totalAmount,
+               COUNT(ih.id) AS totalOrders,
+               SUM(CASE WHEN ih.income_type = 'DAILY' THEN 1 ELSE 0 END) AS processingOrders
         FROM income_history ih
         WHERE (:userId IS NULL OR ih.user_id = :userId)
         GROUP BY ih.income_type

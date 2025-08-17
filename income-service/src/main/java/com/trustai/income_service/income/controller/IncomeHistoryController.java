@@ -24,16 +24,9 @@ import java.util.Map;
 public class IncomeHistoryController extends BaseController {
     private final IncomeHistoryService incomeHistoryService;
 
-    // 1. Summary
-    @GetMapping("/summary")
-    public ResponseEntity<List<IncomeSummaryProjection>> getIncomeSummary() {
-        Long userId = getCurrentUserId();
-        return ResponseEntity.ok(incomeHistoryService.getIncomeSummary(userId));
-    }
-
-    // 2. Details with filter
-    @GetMapping("/details")
-    public ResponseEntity<Page<IncomeHistory>> getIncomeDetails(
+    // 1. Income History of specific user
+    @GetMapping
+    public ResponseEntity<Page<IncomeHistory>> getIncomeHistory(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(required = false) IncomeType incomeType,
@@ -43,6 +36,8 @@ public class IncomeHistoryController extends BaseController {
         return ResponseEntity.ok(incomeHistoryService.getIncomeDetails(userId, startDate, endDate, incomeType, pageable));
     }
 
+
+    // 2. Income summary for multiple user (for internal services)
     @PostMapping("/user-shares")
     public ResponseEntity<Map<Long, BigDecimal>> getSumShare(
             @RequestBody List<Long> userIds,
@@ -54,5 +49,11 @@ public class IncomeHistoryController extends BaseController {
     }
 
 
+    // 3. Summary
+    @GetMapping("/summary")
+    public ResponseEntity<List<IncomeSummaryProjection>> getIncomeSummary() {
+        Long userId = getCurrentUserId();
+        return ResponseEntity.ok(incomeHistoryService.getIncomeSummary(userId));
+    }
 
 }

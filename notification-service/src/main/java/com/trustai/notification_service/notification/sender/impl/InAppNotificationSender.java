@@ -1,9 +1,9 @@
 package com.trustai.notification_service.notification.sender.impl;
 
 import com.trustai.common_base.api.UserApi;
-import com.trustai.notification_service.notification.dto.NotificationRequest;
+import com.trustai.common_base.dto.NotificationRequest;
 import com.trustai.notification_service.notification.entity.InAppNotification;
-import com.trustai.notification_service.notification.enums.NotificationChannel;
+import com.trustai.common_base.enums.NotificationChannel;
 import com.trustai.notification_service.notification.mapper.InAppNotificationMapper;
 import com.trustai.notification_service.notification.repository.InAppNotificationRepository;
 import com.trustai.notification_service.notification.sender.NotificationSender;

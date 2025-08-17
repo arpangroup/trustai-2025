@@ -14,4 +14,6 @@ public class IncomeSummaryDto {
     private BigDecimal yesterdayAmount;
     private BigDecimal last7DaysAmount;
     private BigDecimal totalAmount;
+    private int totalOrders;
+    private int processingOrders;
 }

@@ -1,7 +1,7 @@
 package com.trustai.notification_service.notification.sender;
 
-import com.trustai.notification_service.notification.dto.NotificationRequest;
-import com.trustai.notification_service.notification.enums.NotificationChannel;
+import com.trustai.common_base.dto.NotificationRequest;
+import com.trustai.common_base.enums.NotificationChannel;
 
 public interface NotificationSender {
     NotificationChannel getChannel(); // Returns the type it supports

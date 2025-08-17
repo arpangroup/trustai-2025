@@ -1,10 +1,12 @@
-package com.trustai.notification_service.notification.dto;
+package com.trustai.common_base.dto;
 
-import com.trustai.notification_service.notification.enums.NotificationChannel;
+import com.trustai.common_base.enums.NotificationChannel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +38,8 @@ public class NotificationRequest {
         req.setRecipient(recipient);
         req.setSubject(subject);
         req.setMessage(message);
-        req.setChannels(List.of(NotificationChannel.EMAIL));
+        //req.setChannels(List.of(NotificationChannel.EMAIL)); // ⚠️ Don't use immutable list – can't add more channels later
+        req.setChannels(new ArrayList<>(List.of(NotificationChannel.EMAIL))); // ✅ mutable list
         return req;
     }
 
@@ -44,7 +47,8 @@ public class NotificationRequest {
         NotificationRequest req = new NotificationRequest();
         req.setRecipient(recipient);
         req.setMessage(message);
-        req.setChannels(List.of(NotificationChannel.SMS));
+        //req.setChannels(List.of(NotificationChannel.SMS)); // ⚠️ Don't use immutable list – can't add more channels later
+        req.setChannels(new ArrayList<>(List.of(NotificationChannel.SMS))); // ✅ mutable list
         return req;
     }
 
@@ -53,7 +57,8 @@ public class NotificationRequest {
         req.setRecipient(userId);
         req.setTitle(title);
         req.setMessage(message);
-        req.setChannels(List.of(NotificationChannel.IN_APP));
+        //req.setChannels(List.of(NotificationChannel.IN_APP)); // ⚠️ Don't use immutable list – can't add more channels later
+        req.setChannels(new ArrayList<>(List.of(NotificationChannel.IN_APP))); // ✅ mutable list
         return req;
     }
 
@@ -62,7 +67,8 @@ public class NotificationRequest {
         req.setSendToAll(true);
         req.setTitle(title);
         req.setMessage(message);
-        req.setChannels(List.of(NotificationChannel.IN_APP));
+        //req.setChannels(List.of(NotificationChannel.IN_APP)); // ⚠️ Don't use immutable list – can't add more channels later
+        req.setChannels(new ArrayList<>(List.of(NotificationChannel.IN_APP))); // ✅ mutable list
         return req;
     }
 
@@ -73,5 +79,12 @@ public class NotificationRequest {
         req.setProperties(props);
         req.setChannels(channels);
         return req;
+    }
+
+    public List<NotificationChannel> getChannels() {
+        if (this.channels == null) {
+            this.channels = new ArrayList<>();
+        }
+        return this.channels;
     }
 }

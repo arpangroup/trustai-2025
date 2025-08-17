@@ -1,4 +1,4 @@
-package com.trustai.notification_service.notification.enums;
+package com.trustai.common_base.enums;
 
 public enum NotificationChannel {
     EMAIL,
