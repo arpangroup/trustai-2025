@@ -81,7 +81,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             PendingUser pending = existing.get();
 
             // check if still valid (OTP session not expired)
-            Optional<OtpSession> otpSessionOpt = otpService.getSessionByUsername(pending.getUsername());
+            Optional<OtpSession> otpSessionOpt = otpService.getSessionByUsername(pending.getEmail());
             if (otpSessionOpt.isPresent()) {
                 log.info("User {} already has an active pending registration. Resending OTP.", request.getUsername());
                 otpService.incrementAttempts(otpSessionOpt.get().sessionId(), SecurityConstants.MAX_OTP_ATTEMPTS);
@@ -110,7 +110,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         log.info("Pending user saved successfully: {}", request.getUsername());
 
         // Step 5. Create OTP Session and send
-        OtpSession otpSession = otpService.createSession(request.getUsername(), REG_FLOW, SecurityConstants.MAX_OTP_ATTEMPTS);
+        OtpSession otpSession = otpService.createSession(request.getEmail(), REG_FLOW, SecurityConstants.MAX_OTP_ATTEMPTS);
         otpService.sendOtp(otpSession, "EMAIL"); // or SMS, depending on channel
 
 
@@ -136,12 +136,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 
         // 2. Increment attempts *before* verification
-        try {
-            otpService.incrementAttempts(sessionId, SecurityConstants.MAX_OTP_ATTEMPTS);
-        } catch (RuntimeException ex) {
-            log.error("Too many OTP attempts for session: {}", sessionId);
-            throw new BadCredentialsException("Too many OTP attempts, session invalidated");
-        }
+        otpService.incrementAttempts(sessionId, SecurityConstants.MAX_OTP_ATTEMPTS);
 
         // 3. Verify OTP
         if (!otpService.verifyOtp(sessionId, otp)) {

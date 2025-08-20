@@ -4,14 +4,16 @@ import com.trustai.common_base.auth.entity.OtpSessionEntity;
 import com.trustai.common_base.auth.exception.TooManyOtpAttemptsException;
 import com.trustai.common_base.auth.repository.OtpSessionRepository;
 import com.trustai.common_base.constants.SecurityConstants;
+import com.trustai.common_base.dto.NotificationRequest;
+import com.trustai.common_base.event.NotificationEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +23,7 @@ import java.util.UUID;
 public class DatabaseOtpService implements OtpService {
     private final OtpSessionRepository repository;
     private final SecureRandom random = new SecureRandom();
+    private final ApplicationEventPublisher eventPublisher;
 
 
     @Override
@@ -47,6 +50,16 @@ public class DatabaseOtpService implements OtpService {
                 .orElseThrow(() -> new IllegalStateException("OTP session not found"));
 
         System.out.printf("Sending OTP %s to %s via %s%n", entity.getOtp(), entity.getUsername(), channel);
+        eventPublisher.publishEvent(
+                new NotificationEvent(this,
+                        NotificationRequest.forEmail(
+                                String.valueOf(entity.getUsername()),
+                                "Verification Code from TrustAI",
+                                "Please enter the verification code to verify your account.\n" +
+                                        "<b>" + entity.getOtp() + "</b>"
+                        )
+                )
+        );
     }
 
     @Override
