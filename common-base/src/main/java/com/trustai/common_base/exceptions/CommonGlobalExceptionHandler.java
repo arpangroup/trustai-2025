@@ -266,13 +266,13 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
                 traceId, userId, path, ex.getMessage(), ex);
 
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Runtime Exception",
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getClass().getSimpleName(),
                 ex.getMessage(),
                 path
         );
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
