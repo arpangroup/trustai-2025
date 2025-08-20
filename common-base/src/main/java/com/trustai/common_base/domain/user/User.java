@@ -1,6 +1,7 @@
 package com.trustai.common_base.domain.user;
 
 
+import com.trustai.common_base.utils.IdConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -41,8 +42,8 @@ public class User {
 //    private BigDecimal depositBalance = BigDecimal.ZERO;
 
     // Referral & User Hierarchy Related..................
-    @Column(name = "referral_code", unique = true, length = 255)
-    @Setter(AccessLevel.NONE)
+    @Column(name = "referral_code", length = 10)
+    //@Setter(AccessLevel.NONE)
     private String referralCode;
 
     @ManyToOne
@@ -125,6 +126,7 @@ public class User {
 
     @PostPersist
     private void setReferralAfterInsert() {
+        this.setAccountId(IdConverter.encode(this.id));
         this.referralCode = "REF" + this.id;
     }
 

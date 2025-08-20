@@ -46,7 +46,7 @@ public class AuthService {
                 .orElseThrow(() -> new BadCredentialsException("Invalid or expired OTP session"));
 
         if (!otpService.verifyOtp(sessionId, otp)) {
-            otpService.incrementAttempts(sessionId, 3); // max 3 attempts
+            otpService.incrementAttempts(sessionId, SecurityConstants.MAX_OTP_ATTEMPTS);
             throw new BadCredentialsException("Invalid OTP");
         }
 

@@ -1,29 +1,21 @@
 package com.trustai.trustai_core_app;
 
-import com.trustai.common_base.domain.user.Role;
 import com.trustai.common_base.domain.user.User;
-import com.trustai.common_base.dto.NotificationRequest;
-import com.trustai.common_base.enums.NotificationChannel;
 import com.trustai.common_base.repository.user.UserRepository;
-import com.trustai.notification_service.notification.service.NotificationService;
-import com.trustai.user_service.user.entity.Kyc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.trustai.*"})
 @EnableAsync
 public class TrustaiCoreAppApplication implements CommandLineRunner {
 	@Autowired UserRepository userRepository;
-	@Autowired NotificationService notificationService;
 
 	String adminPassword = "$2a$12$7Q.ejHVLMMtPyBu4VQEULO8TnoJlX1xSuzjLn07GjLmeNwuJrt8Yy"; // admin@123
 	String testPassword1 = "$2a$12$4sLp.sNltnRtf7tsDD4m1Oz1LxRY2MmNTZqe8bWnmt7/3lRW68ILq"; // test1
@@ -66,18 +58,5 @@ public class TrustaiCoreAppApplication implements CommandLineRunner {
 		user2.addRole("USER");
 		user_admin.setPassword(testPassword2);
 		userRepository.save(user2);*/
-	}
-
-	private void initNotifications() {
-		NotificationRequest request = NotificationRequest.forInApp(
-				"2",
-				"Welcome to the system!",
-				"Hello, this is a test notification from CommandLineRunner 🎉"
-		);
-
-		// You can also add more channels
-		request.getChannels().add(NotificationChannel.SMS);
-
-		notificationService.send(request);
 	}
 }

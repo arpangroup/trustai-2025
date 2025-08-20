@@ -26,6 +26,10 @@ public class UsernamePasswordAuthStrategy implements AuthenticationStrategy {
 
     @Override
     public Object start(AuthRequest request) {
+        // Pre-validation
+        if (request.username() == null || request.username().isBlank()) throw new BadCredentialsException("Username is required");
+        if (request.password() == null || request.password().isBlank()) throw new BadCredentialsException("Password is required");
+
         try {
             // Authenticate using username & password
             var authToken = new UsernamePasswordAuthenticationToken(request.username(), request.password());

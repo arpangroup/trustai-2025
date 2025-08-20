@@ -1,4 +1,4 @@
-package com.trustai.common_base.auth.dto;
+package com.trustai.common_base.auth.registration;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -14,6 +14,7 @@ public class RegistrationRequest {
 //    @NotBlank(message = "password is required")
 //    @Size(min = 5, message = "password must be at least 5 characters long")
 //    @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "password must be alphanumeric (letters and digits only)")
+    @NotBlank
     private String password;
 
 //    @NotBlank(message = "firstname is required")
@@ -27,6 +28,7 @@ public class RegistrationRequest {
 //    @Email(message = "Invalid email format")
 //    @Pattern(regexp = "^$|^.+$", message = "Email must not be only whitespace")
 //    @Column(unique = true)
+    @NotBlank
     private String email; // required|string|email|unique
 
 //    @Pattern(regexp = "^$|^[0-9]{10}$", message = "mobile number must be exactly 10 digits") // Mobile number must be exactly 10 digits if provided

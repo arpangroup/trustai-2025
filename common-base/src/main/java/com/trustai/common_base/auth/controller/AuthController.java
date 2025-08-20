@@ -58,6 +58,9 @@ public class AuthController {
 
 
 
+
+
+
     //  Rate Limiting (Mandatory)
     // GET /api/auth/availability?username=arpan&email=arpan@example.com
     //@RateLimiter(name = "checkAvailability")
@@ -66,26 +69,6 @@ public class AuthController {
             @RequestParam("username") String username,
             @RequestParam("email") String email) {
         return ResponseEntity.ok(new AvailabilityResponse());
-
-    }
-
-    @PostMapping("/request-email-verification")
-    public void requestEmailVerification(@RequestBody EmailRequest request) {
-
-    }
-
-    @PostMapping("/verify-email")
-    public void verifyEmail(@RequestBody EmailVerificationRequest request) {
-
-    }
-
-    @PostMapping("/register")
-    public void register(@RequestBody RegistrationRequest request) {
-
-    }
-
-    @PostMapping("/login")
-    public void login(@RequestBody LoginRequest request) {
 
     }
 }

@@ -1,15 +1,13 @@
 package com.trustai.common_base.auth.controller;
 
-import com.trustai.common_base.auth.dto.VerifyEmailRequest;
+import com.trustai.common_base.auth.dto.request.OtpVerifyRequest;
+import com.trustai.common_base.auth.registration.RegistrationRequest;
+import com.trustai.common_base.auth.registration.RegistrationService;
 import com.trustai.common_base.domain.user.User;
+import com.trustai.common_base.dto.ApiResponse;
 import com.trustai.common_base.exceptions.NotFoundException;
 import com.trustai.common_base.repository.user.UserRepository;
-import com.trustai.common_base.auth.dto.CompleteRegistrationRequest;
-import com.trustai.common_base.auth.dto.InitiateRegistrationRequest;
-import com.trustai.common_base.auth.dto.RegistrationRequest;
-import com.trustai.common_base.auth.service.RegistrationService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +24,26 @@ import java.util.Map;
 @Slf4j
 public class RegistrationController {
     private final RegistrationService registrationService;
-    private final HttpServletRequest servletRequest;
     private final UserRepository userRepository;
 
+    @PostMapping
+    public ResponseEntity<ApiResponse> createPendingRegistration(@RequestBody RegistrationRequest request) {
+        log.info("Received registration request for email: {}", request.getEmail());
+        registrationService.createPendingRegistration(request);
+        log.info("OTP successfully sent to email: {}", request.getEmail());
+        return ResponseEntity.ok(ApiResponse.success("OTP sent to email"));
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<ApiResponse> verifyAndCompleteRegistration(@RequestBody OtpVerifyRequest request) {
+        log.info("Received OTP verification request for session ID: {}", request.getSessionId());
+        registrationService.completeRegistration(request.getSessionId(), request.getOtp());
+        log.info("OTP verification successful for session ID: {}", request.getSessionId());
+        return ResponseEntity.ok(ApiResponse.success("Registration completed successfully"));
+    }
+
+
+/*
     @PostMapping("/initiate")
     public ResponseEntity<?> initiate(@RequestBody InitiateRegistrationRequest request) {
         registrationService.initiateRegistration(request, servletRequest);
@@ -59,7 +74,7 @@ public class RegistrationController {
 
         registrationService.directRegister(user, request.getReferralCode());
         return ResponseEntity.ok("Registration complete");
-    }
+    }*/
 
     @PostMapping("/add-users")
     public ResponseEntity<?> registerDummyUser() {

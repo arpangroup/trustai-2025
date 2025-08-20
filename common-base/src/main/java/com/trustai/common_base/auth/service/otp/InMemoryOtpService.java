@@ -86,6 +86,8 @@ public class InMemoryOtpService implements OtpService {
     }
 
     private String generateOtp() {
+        SecureRandom secureRandom = new SecureRandom();
+
         int bound = (int) Math.pow(10, SecurityConstants.OTP_LENGTH);
         int code = random.nextInt(bound);
         return String.format("%0" + SecurityConstants.OTP_LENGTH + "d", code);

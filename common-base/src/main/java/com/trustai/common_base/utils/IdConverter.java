@@ -1,5 +1,6 @@
 package com.trustai.common_base.utils;
 
+import java.security.SecureRandom;
 import java.util.Random;
 
 /**
@@ -19,6 +20,7 @@ public class IdConverter {
     private static final int TARGET_LENGTH = 9;
     private static final long MAX_ID = (long) Math.pow(BASE, TARGET_LENGTH) - 1;
     private static final long SECRET = 987654321L;
+    private static final SecureRandom random = new SecureRandom();
 
     public static String encode(long id) {
         if (id < 0 || id > MAX_ID) {

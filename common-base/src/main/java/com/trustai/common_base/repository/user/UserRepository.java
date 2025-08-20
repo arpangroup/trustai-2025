@@ -22,6 +22,7 @@ public interface UserRepository extends BaseRepository<User, Long> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 
+    boolean existsByReferralCode(String referralCode);
     Optional<User> findByReferralCode(String referralCode);
     List<User> findByIdIn(List<Long> ids);
     boolean existsByMobile(String mobile);
