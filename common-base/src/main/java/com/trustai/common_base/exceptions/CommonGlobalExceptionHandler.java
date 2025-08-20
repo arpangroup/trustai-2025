@@ -303,7 +303,7 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
 
     private void maybePrintStackTrace(Exception ex) {
         if ("local".equalsIgnoreCase(activeProfile)) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
         }
     }
 

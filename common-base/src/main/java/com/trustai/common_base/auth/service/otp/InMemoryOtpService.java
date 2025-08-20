@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service
+//@Service
 @RequiredArgsConstructor
 public class InMemoryOtpService implements OtpService {
 
@@ -73,6 +73,11 @@ public class InMemoryOtpService implements OtpService {
             return Optional.empty();
         }
         return Optional.of(new OtpSession(sessionId, data.username(), data.flow()));
+    }
+
+    @Override
+    public Optional<OtpSession> getSessionByUsername(String username) {
+        return Optional.empty();
     }
 
     @Override

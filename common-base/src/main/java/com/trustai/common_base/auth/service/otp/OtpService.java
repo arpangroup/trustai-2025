@@ -8,5 +8,6 @@ public interface OtpService {
     boolean verifyOtp(String sessionId, String otp);
     void incrementAttempts(String sessionId, int maxAllowed);
     Optional<OtpSession> getSession(String sessionId);
+    Optional<OtpSession> getSessionByUsername(String username);
     void invalidateSession(String sessionId);
 }

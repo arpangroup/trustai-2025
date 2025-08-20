@@ -7,10 +7,13 @@ import com.trustai.common_base.auth.entity.VerificationToken;
 import com.trustai.common_base.auth.entity.VerificationType;
 import com.trustai.common_base.auth.exception.AuthException;
 import com.trustai.common_base.auth.exception.BadCredentialsException;
+import com.trustai.common_base.auth.repository.RoleRepository;
 import com.trustai.common_base.auth.service.AuthService;
 import com.trustai.common_base.auth.service.otp.OtpService;
 import com.trustai.common_base.auth.service.otp.OtpSession;
+import com.trustai.common_base.constants.CommonConstants;
 import com.trustai.common_base.constants.SecurityConstants;
+import com.trustai.common_base.domain.user.Role;
 import com.trustai.common_base.domain.user.User;
 import com.trustai.common_base.event.UserRegisteredEvent;
 import com.trustai.common_base.repository.user.UserRepository;
@@ -26,7 +29,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static com.trustai.common_base.constants.SecurityConstants.isExpired;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +46,7 @@ import java.time.LocalDateTime;
 public class RegistrationServiceImpl implements RegistrationService {
     private final PendingUserRepository pendingRepo;
     private final UserRepository userRepo;
+    private final RoleRepository roleRepository;
     private final OtpService otpService;
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
@@ -45,54 +58,58 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public OtpSession createPendingRegistration(RegistrationRequest request) {
         log.info("Start pending registration for email: {}", request.getEmail());
+        validateRegistrationRequest(request);
 
-        // Validate input
-        if (StringUtils.isBlank(request.getUsername())) {
-            log.warn("Validation failed: username is blank");
-            throw new BadCredentialsException("Invalid username");
+        // Step 1: Step 1: Check permanent users
+        if (userRepo.existsByUsername(request.getUsername())) {
+            throw new BadCredentialsException("Username already exists");
         }
-        if (StringUtils.isBlank(request.getPassword())) {
-            log.warn("Validation failed: password is blank");
-            throw new BadCredentialsException("Invalid password");
+        if (userRepo.existsByEmail(request.getEmail())) {
+            throw new BadCredentialsException("Email already exists");
         }
-        if (StringUtils.isBlank(request.getEmail())) {
-            log.warn("Validation failed: email is blank");
-            throw new BadCredentialsException("Invalid email");
-        }
-        if (StringUtils.isBlank(request.getReferralCode())) {
-            log.warn("Validation failed: referralCode is blank");
-            throw new BadCredentialsException("Invalid referralCode");
-        }
-
-        // Step 1: Check uniqueness
-        if(userRepo.existsByUsername(request.getUsername()) || pendingRepo.existsByUsername(request.getUsername())) {
-            log.warn("Username already exists: {}", request.getUsername());
-            throw new IllegalArgumentException("Username already exists");
-        }
-        if(userRepo.existsByEmail(request.getEmail()) || pendingRepo.existsByEmail(request.getEmail())) {
-            log.warn("Email already exists: {}", request.getEmail());
-            throw new IllegalArgumentException("Email already exists");
-        }
-
-        // Step2: Verify ReferralCode:
-        if (userRepo.existsByReferralCode(request.getReferralCode())) {
+        if (!userRepo.existsByReferralCode(request.getReferralCode())) { // Step4: Verify ReferralCode:
             log.warn("Invalid referral code: {}", request.getReferralCode());
-            throw new IllegalArgumentException("referralCode is invalid");
+            throw new BadCredentialsException("referralCode is invalid");
         }
 
-        // Step 3: Create PendingUser
+        // Step 2: Clean up expired pending records for username/email
+        cleanupExpiredPending(request.getUsername(), request.getEmail());
+
+        // Step 3: Handle active pending record
+        Optional<PendingUser> existing = pendingRepo.findByUsername(request.getUsername());
+        if (existing.isPresent()) {
+            PendingUser pending = existing.get();
+
+            // check if still valid (OTP session not expired)
+            Optional<OtpSession> otpSessionOpt = otpService.getSessionByUsername(pending.getUsername());
+            if (otpSessionOpt.isPresent()) {
+                log.info("User {} already has an active pending registration. Resending OTP.", request.getUsername());
+                otpService.incrementAttempts(otpSessionOpt.get().sessionId(), SecurityConstants.MAX_OTP_ATTEMPTS);
+                otpService.sendOtp(otpSessionOpt.get(), "EMAIL");
+                return otpSessionOpt.get();
+            } else {
+                log.info("Pending record expired for {}, cleaning up and creating fresh one", request.getUsername());
+                pendingRepo.delete(pending);
+            }
+
+        }
+
+
+        // Step 4: Create PendingUser
         log.info("Creating pending user for username: {}", request.getUsername());
-        PendingUser pending = new PendingUser();
-        pending.setUsername(request.getUsername());
-        pending.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        pending.setEmail(request.getEmail());
-        pending.setMobile(request.getMobile());
-        pending.setReferralCode(request.getReferralCode());
+        PendingUser pending = PendingUser.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .mobile(request.getMobile())
+                .passwordHash(passwordEncoder.encode(request.getPassword())) // hash before saving in real system!
+                .referralCode(request.getReferralCode())
+                .createdAt(LocalDateTime.now())
+                .build();
 
         pendingRepo.save(pending);
         log.info("Pending user saved successfully: {}", request.getUsername());
 
-        // Step 4. Create OTP Session
+        // Step 5. Create OTP Session and send
         OtpSession otpSession = otpService.createSession(request.getUsername(), REG_FLOW, SecurityConstants.MAX_OTP_ATTEMPTS);
         otpService.sendOtp(otpSession, "EMAIL"); // or SMS, depending on channel
 
@@ -110,27 +127,48 @@ public class RegistrationServiceImpl implements RegistrationService {
     public AuthResponse completeRegistration(String sessionId, String otp) {
         log.info("Completing registration for sessionId: {}", sessionId);
 
+        // 1. Fetch OTP session
         OtpSession session = otpService.getSession(sessionId)
                 .orElseThrow(() -> {
                     log.warn("Invalid or expired OTP session: {}", sessionId);
                     return new BadCredentialsException("Invalid or expired OTP session");
                 });
 
+
+        // 2. Increment attempts *before* verification
+        try {
+            otpService.incrementAttempts(sessionId, SecurityConstants.MAX_OTP_ATTEMPTS);
+        } catch (RuntimeException ex) {
+            log.error("Too many OTP attempts for session: {}", sessionId);
+            throw new BadCredentialsException("Too many OTP attempts, session invalidated");
+        }
+
+        // 3. Verify OTP
+        if (!otpService.verifyOtp(sessionId, otp)) {
+            log.warn("Invalid OTP provided for session: {}", sessionId);
+            throw new BadCredentialsException("Invalid OTP");
+        }
+
+        // 4. OTP verified → promote PendingUser → User
         PendingUser pendingUser = pendingRepo.findByUsername(session.username())
                 .orElseThrow(() -> {
                     log.error("Pending user not found for username: {}", session.username());
                     return new RuntimeException("username not found in pending user");
                 });
 
-        // Move to permanent users table
         log.info("Mapping pending user to permanent user: {}", pendingUser.getUsername());
         User newUser = mapFromPending(pendingUser);
         doRegister(newUser, pendingUser.getReferralCode());
 
+        // Delete pending user
         pendingRepo.delete(pendingUser);
         log.info("Pending user deleted: {}", pendingUser.getUsername());
 
-        AuthResponse response = authService.verifyOtpAndIssueToken(sessionId, otp);
+        // 5. Invalidate OTP session after success
+        otpService.invalidateSession(sessionId);
+
+        // 6. Issue token
+        AuthResponse response = authService.issueTokenForUsername(newUser.getUsername());
         log.info("Registration complete for sessionId: {}", sessionId);
 
         return response;
@@ -188,6 +226,41 @@ public class RegistrationServiceImpl implements RegistrationService {
         return newUser;
     }
 
+    private void cleanupExpiredPending(String username, String email) {
+        pendingRepo.findByUsername(username).ifPresent(p -> {
+            if (isExpired(p.getCreatedAt())) {
+                pendingRepo.delete(p);
+            }
+        });
+
+        pendingRepo.findByEmail(email).ifPresent(p -> {
+            if (isExpired(p.getCreatedAt())) {
+                pendingRepo.delete(p);
+            }
+        });
+    }
+
+    private void validateRegistrationRequest(RegistrationRequest request) {
+        // Validate input
+        if (StringUtils.isBlank(request.getUsername())) {
+            log.warn("Validation failed: username is blank");
+            throw new BadCredentialsException("Invalid username");
+        }
+        if (StringUtils.isBlank(request.getPassword())) {
+            log.warn("Validation failed: password is blank");
+            throw new BadCredentialsException("Invalid password");
+        }
+        if (StringUtils.isBlank(request.getEmail())) {
+            log.warn("Validation failed: email is blank");
+            throw new BadCredentialsException("Invalid email");
+        }
+        if (StringUtils.isBlank(request.getReferralCode())) {
+            log.warn("Validation failed: referralCode is blank");
+            throw new BadCredentialsException("Invalid referralCode");
+        }
+    }
+
+
     private User mapFromPending(PendingUser pendingUser) {
         log.debug("Mapping PendingUser to User for: {}", pendingUser.getUsername());
         User newUser = new User();
@@ -196,6 +269,12 @@ public class RegistrationServiceImpl implements RegistrationService {
         newUser.setEmail(pendingUser.getEmail());
         newUser.setEmailVerified(true);
         newUser.setMobile(pendingUser.getMobile());
+
+        // Fetch existing role from DB
+        Role userRole = roleRepository.findByName(CommonConstants.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Default role not found: " + CommonConstants.ROLE_USER));
+
+        newUser.setRoles(new HashSet<>(List.of(userRole)));
         return newUser;
     }
 

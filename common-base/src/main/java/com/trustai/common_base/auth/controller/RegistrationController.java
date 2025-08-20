@@ -3,6 +3,7 @@ package com.trustai.common_base.auth.controller;
 import com.trustai.common_base.auth.dto.request.OtpVerifyRequest;
 import com.trustai.common_base.auth.registration.RegistrationRequest;
 import com.trustai.common_base.auth.registration.RegistrationService;
+import com.trustai.common_base.auth.service.otp.OtpSession;
 import com.trustai.common_base.domain.user.User;
 import com.trustai.common_base.dto.ApiResponse;
 import com.trustai.common_base.exceptions.NotFoundException;
@@ -27,11 +28,11 @@ public class RegistrationController {
     private final UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createPendingRegistration(@RequestBody RegistrationRequest request) {
+    public ResponseEntity<OtpSession> createPendingRegistration(@RequestBody RegistrationRequest request) {
         log.info("Received registration request for email: {}", request.getEmail());
-        registrationService.createPendingRegistration(request);
+        OtpSession session = registrationService.createPendingRegistration(request);
         log.info("OTP successfully sent to email: {}", request.getEmail());
-        return ResponseEntity.ok(ApiResponse.success("OTP sent to email"));
+        return ResponseEntity.ok(session);
     }
 
     @PostMapping("/verify")

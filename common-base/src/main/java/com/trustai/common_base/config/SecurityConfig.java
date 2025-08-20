@@ -64,7 +64,7 @@ public class SecurityConfig {
                 )
                 //.authenticationProvider(daoProvider) // keep this if not globally registered
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/v1/register/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 // Order is important: check internal token before JWT
