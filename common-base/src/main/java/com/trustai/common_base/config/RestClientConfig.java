@@ -45,7 +45,7 @@ public class RestClientConfig {
 //                })
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + internalToken)
                 .requestInterceptor(loggingInterceptor())
-                .requestInterceptor(loggingResponseInterceptor())
+                //.requestInterceptor(loggingResponseInterceptor())
                 .build();
     }
 
@@ -55,7 +55,7 @@ public class RestClientConfig {
                 .baseUrl("http://localhost:8080/api/v1")
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + internalToken)
                 .requestInterceptor(loggingInterceptor())
-                .requestInterceptor(loggingResponseInterceptor())
+                //.requestInterceptor(loggingResponseInterceptor())
                 .build();
     }
 }

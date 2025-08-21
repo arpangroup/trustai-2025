@@ -145,7 +145,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
 
         // 4. OTP verified → promote PendingUser → User
-        PendingUser pendingUser = pendingRepo.findByUsername(session.username())
+        PendingUser pendingUser = pendingRepo.findByEmail(session.username())// we are storing email as username o=in otp session
                 .orElseThrow(() -> {
                     log.error("Pending user not found for username: {}", session.username());
                     return new RuntimeException("username not found in pending user");
