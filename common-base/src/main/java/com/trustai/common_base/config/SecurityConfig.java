@@ -94,6 +94,8 @@ public class SecurityConfig {
                                 "/public/**",
                                 "/favicon.ico",
                                 "/h2-console",
+//                                "/actuator/**",
+                                "/actuator/health",
                                 CommonConstants.IMAGE_PATH + "/**" // "/images/**"
                         ).permitAll()
                         .anyRequest().authenticated()
