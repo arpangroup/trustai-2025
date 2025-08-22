@@ -20,7 +20,7 @@
         <module>storage-service</module>
         <module>notification-service</module>
         <module>product-service</module>
-        <module>trustai-core-app</module>
+        <module>app-backend</module>
     </modules>
 
     <properties>

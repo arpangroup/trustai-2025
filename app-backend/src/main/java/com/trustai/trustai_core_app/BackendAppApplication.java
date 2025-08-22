@@ -2,7 +2,6 @@ package com.trustai.trustai_core_app;
 
 import com.trustai.common_base.auth.repository.RoleRepository;
 import com.trustai.common_base.constants.CommonConstants;
-import com.trustai.common_base.constants.SecurityConstants;
 import com.trustai.common_base.domain.user.Role;
 import com.trustai.common_base.domain.user.User;
 import com.trustai.common_base.repository.user.UserRepository;
@@ -16,12 +15,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.trustai.*"})
 @EnableAsync
-public class TrustaiCoreAppApplication implements CommandLineRunner {
+public class BackendAppApplication implements CommandLineRunner {
 	@Autowired UserRepository userRepository;
 	@Autowired RoleRepository roleRepository;
 
@@ -30,7 +28,7 @@ public class TrustaiCoreAppApplication implements CommandLineRunner {
 	String testPassword2 = "$2a$12$yXQ9cmGqwXJav5utBBHg3uG.fxV0.fRISbg6mNx5lH.nh1PEuAFPi"; // test2
 
 	public static void main(String[] args) {
-		SpringApplication.run(TrustaiCoreAppApplication.class, args);
+		SpringApplication.run(BackendAppApplication.class, args);
 	}
 
 
