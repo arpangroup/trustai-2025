@@ -41,6 +41,9 @@ public class InAppNotification {
 
     private LocalDateTime viewedAt;   // When it was viewed
 
+    @Column(nullable = false)
+    private boolean deleted = false;  // ✅ Soft delete flag
+
     @PrePersist
     public void prePersist() {
         if (createdAt == null) {

@@ -1,6 +1,6 @@
 package com.trustai.notification_service.notification.sender;
 
-import com.trustai.notification_service.notification.enums.NotificationChannel;
+import com.trustai.common_base.enums.NotificationChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

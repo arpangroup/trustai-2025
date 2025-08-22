@@ -1,7 +1,7 @@
 package com.trustai.notification_service.notification.sender.impl;
 
-import com.trustai.notification_service.notification.dto.NotificationRequest;
-import com.trustai.notification_service.notification.enums.NotificationChannel;
+import com.trustai.common_base.dto.NotificationRequest;
+import com.trustai.common_base.enums.NotificationChannel;
 import com.trustai.notification_service.notification.sender.NotificationSender;
 import com.trustai.notification_service.notification.service.SmsService;
 import lombok.RequiredArgsConstructor;

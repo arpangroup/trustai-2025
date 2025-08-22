@@ -11,10 +11,6 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 public class ReservationRequest {
-    @NotNull(message = "userId is required")
-    @Positive(message = "invalid userId")
-    private Long userId;
-
     //@NotNull(message = "schemaId is required")
     //@Positive(message = "invalid schemaId")
     private Long schemaId;

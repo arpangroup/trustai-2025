@@ -92,7 +92,7 @@ public class EmailTemplateDataInitializer {
                         Please click the button below to verify your email address.
                         """)
                         .setButtonLevel("Verify Email Address")
-                        .setButtonLink("{{token}}")
+                        .setButtonLink("{{accessToken}}")
                         .setEnableFooterStatus(true)
                         .setFooterBody("""
                         Regards,
@@ -102,7 +102,7 @@ public class EmailTemplateDataInitializer {
                         .setBottomTitle("Verify Email Address")
                         .setBottomBody("""
                        If you're having trouble clicking the "Verify Email Address" button, copy\s
-                       and paste the URL below into your web browser:{{token}}
+                       and paste the URL below into your web browser:{{accessToken}}
                        """)
                         .setTemplateFor(TEMPLATE_FOR_USER)
                         .setTemplateActive(true),
@@ -114,7 +114,7 @@ public class EmailTemplateDataInitializer {
                         Please click the button below to Change the Password.
                         """)
                         .setButtonLevel("Reset Password")
-                        .setButtonLink("{{token}}")
+                        .setButtonLink("{{accessToken}}")
                         .setEnableFooterStatus(true)
                         .setFooterBody("""
                         Regards,
@@ -122,7 +122,7 @@ public class EmailTemplateDataInitializer {
                         """)
                         .setEnableFooterBottom(true)
                         .setBottomTitle("User Password Change")
-                        .setBottomBody("{{token}}")
+                        .setBottomBody("{{accessToken}}")
                         .setTemplateFor(TEMPLATE_FOR_USER)
                         .setTemplateActive(true),
                 new EmailTemplate(NotificationCode.USER_INVESTMENT, "Thanks for the Investment on {{site_title}}")
@@ -136,7 +136,7 @@ public class EmailTemplateDataInitializer {
                          {{invest_amount}}
                         """)
                         .setButtonLevel("Login Account")
-                        .setButtonLink("{{token}}")
+                        .setButtonLink("{{accessToken}}")
                         .setEnableFooterStatus(true)
                         .setFooterBody("""
                         Regards,
@@ -218,7 +218,7 @@ public class EmailTemplateDataInitializer {
                         Please click the button below to reset your password
                         """)
                         .setButtonLevel("Review The requestsPassword reset")
-                        .setButtonLink("{{token}}")
+                        .setButtonLink("{{accessToken}}")
                         .setEnableFooterStatus(true)
                         .setFooterBody("""
                         Regards,
@@ -228,7 +228,7 @@ public class EmailTemplateDataInitializer {
                         .setBottomTitle("Withdraw Request")
                         .setBottomBody("""
                        {{full_name}}
-                       {{token}}
+                       {{accessToken}}
                        """)
                         .setTemplateFor(TEMPLATE_FOR_ADMIN)
                         .setTemplateActive(true),

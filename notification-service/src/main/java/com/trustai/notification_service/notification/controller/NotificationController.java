@@ -1,7 +1,8 @@
 package com.trustai.notification_service.notification.controller;
 
+import com.trustai.common_base.controller.BaseController;
 import com.trustai.notification_service.notification.dto.InAppNotificationDto;
-import com.trustai.notification_service.notification.dto.NotificationRequest;
+import com.trustai.common_base.dto.NotificationRequest;
 import com.trustai.notification_service.notification.service.InAppNotificationService;
 import com.trustai.notification_service.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ import java.util.List;
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationController {
+public class NotificationController extends BaseController {
     private final NotificationService notificationService;
     private final InAppNotificationService inAppNotificationService;
 
@@ -33,7 +34,6 @@ public class NotificationController {
     // 2️⃣ Get paginated notifications
     @GetMapping
     public Page<InAppNotificationDto> getNotifications(
-            @RequestParam String userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -84,10 +84,6 @@ public class NotificationController {
         inAppNotificationService.deleteMultipleNotifications(currentUserId, ids);
         log.info("Deleted notifications: {}", ids);
         return ResponseEntity.noContent().build();
-    }
-
-    private Long getCurrentUserId() {
-        return 1L;
     }
 
 }

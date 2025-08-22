@@ -1,5 +1,6 @@
 package com.trustai.investment_service.reservation.controller;
 
+import com.trustai.common_base.controller.BaseController;
 import com.trustai.investment_service.dto.EligibleInvestmentSummary;
 import com.trustai.investment_service.reservation.service.ReservationEligibilityService;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +15,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/reservations/eligibility")
 @RequiredArgsConstructor
-public class ReservationEligibilityController {
+public class ReservationEligibilityController extends BaseController {
     private final ReservationEligibilityService mappingService;
 
     @GetMapping
-    public ResponseEntity<List<EligibleInvestmentSummary>> getEligibleInvestmentSummaries(@RequestParam("userId") Long userId) {
+    public ResponseEntity<List<EligibleInvestmentSummary>> getEligibleInvestmentSummaries() {
+        Long userId = getCurrentUserId();
         List<EligibleInvestmentSummary> result = mappingService.getEligibleInvestmentSummaries(userId);
         return ResponseEntity.ok(result);
     }

@@ -29,7 +29,7 @@ public class InAppNotificationService {
                 sortDir.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending()
         );
 
-        Page<InAppNotificationDto> result = repository.findByUserId(userId, pageable).map(mapper::toDto);
+        Page<InAppNotificationDto> result = repository.findByUserIdAndDeletedFalse(userId, pageable).map(mapper::toDto);
         log.info("Fetched {} notifications for user: {}", result.getNumberOfElements(), userId);
 
         return result;
@@ -52,14 +52,14 @@ public class InAppNotificationService {
     @Transactional
     public void deleteNotification(Long userId, Long id) {
         log.info("Deleting notification {} for user: {}", id, userId);
-        repository.deleteByUserIdAndId(userId, id);
+        repository.softDeleteByUserIdAndId(userId, id);
         log.info("Notification {} deleted for user: {}", id, userId);
     }
 
     @Transactional
     public void deleteMultipleNotifications(Long userId, List<Long> ids) {
         log.info("Deleting multiple notifications for user: {}, IDs: {}", userId, ids);
-        repository.deleteByUserIdAndIdIn(userId, ids);
+        repository.softDeleteByUserIdAndIdIn(userId, ids);
         log.info("Deleted {} notifications for user: {}", ids.size(), userId);
     }
 }

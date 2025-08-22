@@ -1,8 +1,7 @@
-/*
-package com.trustai.trustai_common.security.service;
+package com.trustai.common_base.security.service;
 
-import com.trustai.trustai_common.domain.user.Role;
-import com.trustai.trustai_common.domain.user.User;
+import com.trustai.common_base.domain.user.Role;
+import com.trustai.common_base.domain.user.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,17 +18,24 @@ public class CustomUserDetails implements UserDetails {
     private final String password;
     private final boolean enabled;
     private final Set<GrantedAuthority> authorities;
+    private final User.AccountStatus accountStatus;
+    private final String email;
+    private final String mobile;
+    private final Set<Role> roles;
 
     public CustomUserDetails(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.enabled = user.getAccountStatus() == User.AccountStatus.ACTIVE;
-        Set<Role> roles = user.getRoles() != null ? user.getRoles() : Collections.emptySet();
+        this.roles = user.getRoles() != null ? user.getRoles() : Collections.emptySet();
         this.authorities = roles.stream()
-                .map(Role::getCode)
+                .map(Role::getName)
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
+        this.accountStatus = user.accountStatus;
+        this.email = user.getEmail();
+        this.mobile = user.getMobile();
     }
 
     @Override
@@ -42,6 +48,5 @@ public class CustomUserDetails implements UserDetails {
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return enabled; }
+    @Override public boolean isEnabled() { return true; }
 }
-*/

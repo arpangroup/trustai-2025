@@ -1,5 +1,6 @@
 package com.trustai.income_service.income.entity;
 
+import com.trustai.common_base.enums.IncomeType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,7 +8,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "income_history")
+@Table(name = "income_history", indexes = {
+        @Index(name = "idx_income_type_created_at", columnList = "incomeType, createdAt")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -36,13 +39,6 @@ public class IncomeHistory {
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
-    }
-
-    public enum IncomeType {
-        DAILY,
-        TEAM,
-        REFERRAL,
-        RESERVE
     }
 
     public IncomeHistory(Long userId, BigDecimal amount, String sourceUserRank) {

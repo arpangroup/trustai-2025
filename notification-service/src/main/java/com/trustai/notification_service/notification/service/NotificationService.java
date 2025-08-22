@@ -1,7 +1,7 @@
 package com.trustai.notification_service.notification.service;
 
 import com.trustai.notification_service.notification.sender.NotificationSenderFactory;
-import com.trustai.notification_service.notification.dto.NotificationRequest;
+import com.trustai.common_base.dto.NotificationRequest;
 import com.trustai.notification_service.template.render.TemplateRenderer;
 import com.trustai.notification_service.template.service.impl.EmailTemplateService;
 import lombok.RequiredArgsConstructor;

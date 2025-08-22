@@ -3,9 +3,12 @@ package com.trustai.user_service.user.mapper;
 import com.trustai.common_base.domain.user.User;
 import com.trustai.common_base.dto.*;
 import com.trustai.common_base.utils.DateUtils;
+import com.trustai.common_base.utils.IdConverter;
 import com.trustai.common_base.utils.PhoneMaskingUtil;
 import com.trustai.user_service.user.entity.Kyc;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 public class UserMapper {
@@ -25,11 +28,15 @@ public class UserMapper {
     }*/
 
     public UserInfo mapTo(User user) {
+        String accountId = IdConverter.encode(user.getId());
         return UserInfo.builder()
                 .id(user.getId())
+                .accountId(accountId)
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .rankCode(user.getRankCode())
+                .point(user.getPoint())
+                .image(user.getImage())
                 // Balance:
                 .walletBalance(user.getWalletBalance())
                 .profitBalance(user.getProfitBalance())
@@ -46,6 +53,7 @@ public class UserMapper {
 
     public UserDetailsInfo mapToDetails(User user) {
         final User referrer = user.getReferrer();
+        String referrerId = IdConverter.encode(referrer.getId());
         return UserDetailsInfo.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -58,7 +66,7 @@ public class UserMapper {
                 .profitBalance(user.getProfitBalance())
                 // Referral:
                 .referralCode(user.getReferralCode())
-                .referrer(referrer == null ? null : new UserInfo(referrer.getId(), referrer.getUsername()))
+                .referrer(referrer == null ? null : new UserInfo(user.getId(), referrer.getUsername()))
                 .rankCode(user.getRankCode())
                 // KYC:
                 //.kyc(convert(user.getKycInfo()))
@@ -70,23 +78,23 @@ public class UserMapper {
     }
 
     private AccountStatus convert(User user) {
-        Kyc kyc = getKycInfo(user);
+        //Kyc kyc = getKycInfo(user);
         return AccountStatus.builder()
                 .isAccountActive(user.getAccountStatus() == User.AccountStatus.ACTIVE)
-                .isKycVerified(kyc.status == Kyc.KycStatus.VERIFIED)
-                .isEmailVerified(kyc.getEmailVerifyStatus() == Kyc.EpaStatus.VERIFIED)
-                .isPhoneVerified(kyc.getPhoneVerifyStatus() == Kyc.EpaStatus.VERIFIED)
+                //.isKycVerified(kyc.status == Kyc.KycStatus.VERIFIED)
+                //.isEmailVerified(kyc.getEmailVerifyStatus() == Kyc.EpaStatus.VERIFIED)
+                //.isPhoneVerified(kyc.getPhoneVerifyStatus() == Kyc.EpaStatus.VERIFIED)
 
                 .isDepositEnabled(user.depositStatus == User.TransactionStatus.ENABLED)
                 .isWithdrawEnabled(user.withdrawStatus == User.TransactionStatus.ENABLED)
                 .isSendMoneyEnabled(user.sendMoneyStatus == User.TransactionStatus.ENABLED)
 
                 .accountStatus(user.accountStatus.name())
-                .kycStatus(kyc.status.name())
-                .emailVerifyStatus(kyc.getEmailVerifyStatus().name())
-                .phoneVerifyStatus(kyc.getPhoneVerifyStatus().name())
+                //.kycStatus(kyc.status.name())
+                //.emailVerifyStatus(kyc.getEmailVerifyStatus().name())
+                //.phoneVerifyStatus(kyc.getPhoneVerifyStatus().name())
 
-                .kycRejectionReason(kyc.getKycRejectionReason())
+                //.kycRejectionReason(kyc.getKycRejectionReason())
                 .build();
     }
 

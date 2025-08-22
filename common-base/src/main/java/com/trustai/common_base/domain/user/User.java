@@ -1,6 +1,7 @@
 package com.trustai.common_base.domain.user;
 
 
+import com.trustai.common_base.utils.IdConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -9,6 +10,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -17,8 +19,9 @@ import java.util.Set;
 @NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    private String accountId;
     @Column(name = "username", unique = true, nullable = false, length = 100)
     private String username;
     private String firstname;
@@ -27,6 +30,8 @@ public class User {
     @Column(unique = true, nullable = false, length = 100)
     private String email;
     private String mobile;
+    private String image;
+    private int point = 100;
 
     // Balance Related....................
     @Column(name = "wallet_balance", precision = 19, scale = 4)
@@ -37,8 +42,8 @@ public class User {
 //    private BigDecimal depositBalance = BigDecimal.ZERO;
 
     // Referral & User Hierarchy Related..................
-    @Column(name = "referral_code", unique = true, length = 255)
-    @Setter(AccessLevel.NONE)
+    @Column(name = "referral_code", length = 10)
+    //@Setter(AccessLevel.NONE)
     private String referralCode;
 
     @ManyToOne
@@ -79,11 +84,14 @@ public class User {
     private String oauthId;
 
 
+    //@ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id")})
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
+
+
 
 
     /*
@@ -100,7 +108,6 @@ public class User {
     private int dailyAdLimit;
 
     private Address addressDetails;
-    private String image;
 
     private int status;
 
@@ -120,6 +127,7 @@ public class User {
 
     @PostPersist
     private void setReferralAfterInsert() {
+        this.setAccountId(IdConverter.encode(this.id));
         this.referralCode = "REF" + this.id;
     }
 
@@ -138,6 +146,22 @@ public class User {
     public User(Long id, String username, String rankCode, BigDecimal walletBalance) {
         this(username, rankCode, walletBalance);
         this.id = id;
+    }
+
+    public boolean isActive() {
+        return this.accountStatus == AccountStatus.ACTIVE;
+    }
+
+    public String getFullName() {
+        if (firstname != null && lastname != null) {
+            return firstname + " " + lastname;
+        } else if (firstname != null) {
+            return firstname;
+        } else if (lastname != null) {
+            return lastname;
+        } else {
+            return username;
+        }
     }
 
     /*
@@ -162,5 +186,12 @@ public class User {
     public enum TransactionStatus {
         ENABLED,
         DISABLED,
+    }
+
+    public void addRole(String role) {
+        if (this.roles == null) {
+            this.roles = new HashSet<>();
+        }
+        this.roles.add(new Role(role));
     }
 }

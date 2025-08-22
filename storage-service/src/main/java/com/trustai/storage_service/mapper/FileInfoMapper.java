@@ -15,8 +15,8 @@ import java.util.UUID;
 
 @Component
 public class FileInfoMapper {
-    public final String DOWNLOAD_PATH = "/api/v1/files/download/";
-    public final String THUMBNAIL_PATH = "/api/v1/files/thumbnail/";
+    public static final String IMAGE_PATH = "/images"; // CommonConstants
+    public final String THUMBNAIL_PATH = IMAGE_PATH + "/thumbnail";
 
     private String getBaseUrl(HttpServletRequest request) {
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
@@ -24,7 +24,7 @@ public class FileInfoMapper {
 
     private String getBaseUrl(HttpServletRequest request, String fileName) {
         String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
-        return baseUrl + DOWNLOAD_PATH + fileName;
+        return baseUrl + IMAGE_PATH + "/" + fileName;
     }
 
     public FileInfo mapToFileInfo(Path path, HttpServletRequest request) {
@@ -59,8 +59,8 @@ public class FileInfoMapper {
 
             // Download/thumbnail URLs (replace with your app's logic)
             String filename = path.getFileName().toString();
-            info.setDownloadUrl(getBaseUrl(request) + DOWNLOAD_PATH + filename);
-            info.setThumbnailUrl(getBaseUrl(request) + THUMBNAIL_PATH + filename);
+            info.setDownloadUrl(getBaseUrl(request) + IMAGE_PATH + "/" + filename);
+            info.setThumbnailUrl(getBaseUrl(request) + THUMBNAIL_PATH + "/" + filename);
 
         } catch (IOException e) {
             throw new RuntimeException("Error mapping file info for: " + path, e);

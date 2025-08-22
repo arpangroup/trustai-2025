@@ -16,7 +16,7 @@ public class FirebaseMessagingService {
     public void sendNotification(String recipient, String title, String body) {
         // Prepare Firebase push message
         Message message = Message.builder()
-                .setToken(recipient) // FCM token
+                .setToken(recipient) // FCM accessToken
                 .setNotification(Notification.builder()
                         .setTitle(title)
                         .setBody(body)

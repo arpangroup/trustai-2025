@@ -1,10 +1,10 @@
 package com.trustai.user_service.controller;
 
+import com.trustai.common_base.controller.BaseController;
 import com.trustai.common_base.domain.user.User;
-import com.trustai.common_base.dto.UserDetailsInfo;
 import com.trustai.common_base.dto.UserInfo;
 import com.trustai.common_base.repository.user.UserRepository;
-import com.trustai.user_service.auth.service.RegistrationService;
+import com.trustai.common_base.auth.registration.RegistrationService;
 import com.trustai.user_service.user.dto.PasswordUpdateRequest;
 import com.trustai.user_service.user.mapper.UserMapper;
 import com.trustai.user_service.user.service.UserAccountService;
@@ -22,7 +22,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Slf4j
-public class UserController {
+public class UserController extends BaseController {
     private final UserProfileService userService;
     private final UserAccountService userAccountService;
     private final RegistrationService registrationService;
@@ -50,11 +50,20 @@ public class UserController {
         return ResponseEntity.ok(paginatedUsers);
     }
 
+    /*
     @GetMapping("/{userId}")
     public ResponseEntity<UserDetailsInfo> getUserInfoDetails(@PathVariable Long userId) {
         log.info("getUserInfo for User ID: {}......", userId);
         User user = userService.getUserById(userId);
         return ResponseEntity.ok(mapper.mapToDetails(user));
+    }*/
+
+    @GetMapping("/info")
+    public ResponseEntity<UserInfo> getUserInfo() {
+        Long userId = getCurrentUserId();
+        log.info("getUserInfo for User ID: {}......", userId);
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(mapper.mapTo(user));
     }
 
     @PatchMapping("/{userId}")

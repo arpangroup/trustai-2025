@@ -17,7 +17,7 @@ import java.io.InputStream;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/files")
+@RequestMapping("/images")
 public class FileDownloadController {
     private final StorageService storageService;
 
@@ -26,10 +26,18 @@ public class FileDownloadController {
         this.storageService = storageService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<FileInfo>> listFiles() {
-        List<FileInfo> files = storageService.listAllFiles();
-        return ResponseEntity.ok(files);
+    @GetMapping("/{fileId:.*}")
+    public ResponseEntity<InputStreamResource> serveImage(@PathVariable String fileId) {
+        try {
+            InputStream imageStream = storageService.download(fileId);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_JPEG);  // adjust if you expect PNG, GIF, etc.
+
+            return new ResponseEntity<>(new InputStreamResource(imageStream), headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /*@GetMapping("/download/{filename:.+}")
@@ -45,19 +53,4 @@ public class FileDownloadController {
             return ResponseEntity.notFound().build();
         }
     }*/
-
-    @GetMapping("/download/{fileId:.*}")
-    public ResponseEntity<InputStreamResource> serveImage(@PathVariable String fileId) {
-        try {
-            InputStream imageStream = storageService.download(fileId);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.IMAGE_JPEG);  // adjust if you expect PNG, GIF, etc.
-
-            return new ResponseEntity<>(new InputStreamResource(imageStream), headers, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
 }

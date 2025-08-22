@@ -3,7 +3,7 @@ package com.trustai.notification_service.notification.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trustai.notification_service.notification.dto.InAppNotificationDto;
-import com.trustai.notification_service.notification.dto.NotificationRequest;
+import com.trustai.common_base.dto.NotificationRequest;
 import com.trustai.notification_service.notification.entity.InAppNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

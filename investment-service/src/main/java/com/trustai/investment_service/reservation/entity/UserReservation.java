@@ -45,12 +45,14 @@ public class UserReservation {
     private BigDecimal reservedAmount;
     @Column(precision = 19, scale = 4)
     private BigDecimal valuationDelta = BigDecimal.ZERO;
+    @Column(nullable = true, precision = 19, scale = 4)
+    private BigDecimal soldAmount;
+    @Column(nullable = true, precision = 19, scale = 4)
+    private BigDecimal profit;
 
     @Column(name = "reserved_at", nullable = false)
     private LocalDateTime reservedAt;
 
-    @Column(nullable = true, precision = 19, scale = 4)
-    private BigDecimal profit;
 
     @Column(name = "expiry_at", nullable = false)
     private LocalDateTime expiryAt; // = reservedAt + 1 day

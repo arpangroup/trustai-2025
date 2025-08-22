@@ -1,7 +1,7 @@
 package com.trustai.investment_service.reservation.scheduler;
 
 import com.trustai.investment_service.reservation.entity.UserReservation;
-import com.trustai.investment_service.reservation.repository.StakeReservationRepository;
+import com.trustai.investment_service.reservation.repository.UserReservationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ReservationScheduler {
-    private final StakeReservationRepository reservationRepository;
+    private final UserReservationRepository reservationRepository;
 
     /**
      * Cron job to expire unsold reservations daily.

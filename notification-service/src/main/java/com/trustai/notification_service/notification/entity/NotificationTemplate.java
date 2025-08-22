@@ -1,6 +1,6 @@
 package com.trustai.notification_service.notification.entity;
 
-import com.trustai.notification_service.notification.enums.NotificationChannel;
+import com.trustai.common_base.enums.NotificationChannel;
 import com.trustai.notification_service.notification.enums.NotificationCode;
 import jakarta.persistence.*;
 import lombok.Data;

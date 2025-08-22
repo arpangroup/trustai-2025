@@ -19,9 +19,7 @@ import static com.trustai.common_base.utils.RestCallHandler.handleRestCall;
 public class WalletApiRestClientImpl implements WalletApi {
     private final RestClient restClient;
 
-    public WalletApiRestClientImpl(
-            @Qualifier("v1ApiRestClient") RestClient restClient
-    ) {
+    public WalletApiRestClientImpl(@Qualifier("v1ApiRestClient") RestClient restClient) {
         this.restClient = restClient;
     }
 

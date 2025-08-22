@@ -10,6 +10,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -22,6 +23,7 @@ public class EmailServiceImpl implements EmailService {
     private final MailProperties mailProperties;
 
     @Override
+    @Async
     public void sendSimpleMail(String to, String subject, String text) {
         log.info("Sending simple text email to: {}, subject: {}", to, subject);
         try {
@@ -40,6 +42,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendMail(String to, String subject, String htmlContent) {
         log.info("Sending HTML email to: {}, subject: {}", to, subject);
         try {
@@ -55,11 +58,12 @@ public class EmailServiceImpl implements EmailService {
             log.info("HTML email sent successfully to {}", to);
         } catch (Exception e) {
             log.error("Failed to send HTML email to {}. Error: {}", to, e.getMessage(), e);
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
     @Override
+    @Async
     public void sendMailWithAttachment(String to, String subject, String text, String pathToAttachment) {
         log.info("Sending email with attachment to: {}, subject: {}, attachment: {}", to, subject, pathToAttachment);
         try {

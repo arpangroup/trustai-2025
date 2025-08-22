@@ -1,6 +1,7 @@
 package com.trustai.investment_service.entity.data;
 
 import com.trustai.common_base.api.RankConfigApi;
+import com.trustai.common_base.constants.CommonConstants;
 import com.trustai.common_base.dto.RankConfigDto;
 import com.trustai.common_base.enums.CurrencyType;
 import com.trustai.investment_service.entity.InvestmentSchema;
@@ -20,6 +21,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Component
 @DependsOn("scheduleData")
@@ -28,7 +31,6 @@ public class StakeDataInitializer {
     private final SchemaRepository schemaRepository;
     private final ScheduleRepository scheduleRepository;
     private final RankConfigApi rankConfigApi;
-
 
     int count = 0;
     List<String> imageList = new ArrayList<>();
@@ -102,27 +104,8 @@ public class StakeDataInitializer {
     }
 
     private  List<String> loadImages() {
-        return List.of(
-                "http://localhost:8080/api/v1/files/download/stake_1.png",
-                "http://localhost:8080/api/v1/files/download/stake_2.png",
-                "http://localhost:8080/api/v1/files/download/stake_3.png",
-                "http://localhost:8080/api/v1/files/download/stake_4.png",
-                "http://localhost:8080/api/v1/files/download/stake_5.png",
-                "http://localhost:8080/api/v1/files/download/stake_6.png",
-                "http://localhost:8080/api/v1/files/download/stake_7.png",
-                "http://localhost:8080/api/v1/files/download/stake_8.png",
-                "http://localhost:8080/api/v1/files/download/stake_9.png",
-                "http://localhost:8080/api/v1/files/download/stake_10.png",
-                "http://localhost:8080/api/v1/files/download/stake_11.png",
-                "http://localhost:8080/api/v1/files/download/stake_12.png",
-                "http://localhost:8080/api/v1/files/download/stake_13.png",
-                "http://localhost:8080/api/v1/files/download/stake_14.png",
-                "http://localhost:8080/api/v1/files/download/stake_15.png",
-                "http://localhost:8080/api/v1/files/download/stake_16.png",
-                "http://localhost:8080/api/v1/files/download/stake_17.png",
-                "http://localhost:8080/api/v1/files/download/stake_18.png",
-                "http://localhost:8080/api/v1/files/download/stake_19.png",
-                "http://localhost:8080/api/v1/files/download/stake_20.png"
-        );
+        return IntStream.rangeClosed(1, 20)
+                .mapToObj(i -> CommonConstants.BASE_URL + CommonConstants.IMAGE_PATH + "/stake_" + i + ".png")
+                .collect(Collectors.toList());
     }
 }

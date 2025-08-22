@@ -1,12 +1,16 @@
 package com.trustai.investment_service.reservation.service;
 
+import com.trustai.investment_service.reservation.dto.ReservationSummary;
 import com.trustai.investment_service.reservation.dto.UserReservationDto;
 import com.trustai.investment_service.reservation.entity.UserReservation;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface StakeReservationService {
+    ReservationSummary getReservationSummary(Long userId);
+
     /**
      * Aut-Reserve a stake for the user. Only one reservation per day is allowed.
      *
@@ -28,10 +32,10 @@ public interface StakeReservationService {
     /**
      * Sell a previously reserved stake/schema.
      *
-     * @param reservationId reservation ID
+     * @param orderId reservation ID
      * @param userId        user ID (to verify ownership)
      */
-    void sellReservation(Long reservationId, Long userId);
+    void sellReservation(Long orderId, Long userId);
 
     /**
      * Fetch all currently active (not expired or sold) reservations for the user.
@@ -39,10 +43,11 @@ public interface StakeReservationService {
      * @param userId user ID
      * @return list of active reservations
      */
-    List<UserReservationDto> getActiveReservations(Long userId);
+    List<UserReservationDto> getReservations(Long userId, boolean activeOnly, LocalDate startDate, LocalDate endDate);
 
     /**
      * Expire all reservations that have passed their expiry time and are still unsold.
      */
     void expireUnclaimedReservations();
+
 }

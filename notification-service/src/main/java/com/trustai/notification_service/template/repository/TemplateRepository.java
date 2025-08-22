@@ -1,7 +1,7 @@
 package com.trustai.notification_service.template.repository;
 
 import com.trustai.notification_service.notification.entity.NotificationTemplate;
-import com.trustai.notification_service.notification.enums.NotificationChannel;
+import com.trustai.common_base.enums.NotificationChannel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
