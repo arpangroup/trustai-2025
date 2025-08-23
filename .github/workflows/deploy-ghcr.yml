@@ -88,10 +88,7 @@ jobs:
           context: .                                  # Build context is the root directory
           push: true                                  # Push the image to registry
           tags: |
-            # Tag with commit SHA
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            
-             # Tag as "latest"
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
       # Logout from Docker
