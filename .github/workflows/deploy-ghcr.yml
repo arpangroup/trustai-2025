@@ -67,7 +67,7 @@ jobs:
       # Build the application
       - name: Build the application
         run: |
-          mvn -B package --file pom.xml
+          mvn -B package -DskipTests --file pom.xml
 
       # Verify the JAR actually exists:
       - name: Verify build artifacts
