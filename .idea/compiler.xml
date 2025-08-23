@@ -90,10 +90,15 @@
         <module name="user-service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="app-frontend" target="1.5" />
+      <module name="app-fullstack" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="app-backend" options="-parameters" />
+      <module name="app-fullstack" options="" />
       <module name="common-base" options="-parameters" />
       <module name="income-service" options="-parameters" />
       <module name="investment-service" options="-parameters" />
