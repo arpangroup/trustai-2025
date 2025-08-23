@@ -1,3 +1,7 @@
 /uploads/
 
 .idea
+/.idea/*
+trustai-core-app/target/*
+
+#.env
