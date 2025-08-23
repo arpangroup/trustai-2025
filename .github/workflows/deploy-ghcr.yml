@@ -1,3 +1,5 @@
+# .github/workflows/deploy-ghcr.yml
+
 # 🔧 Workflow to build a Docker image, push it to GitHub Container Registry (GHCR),
 # and deploy it to a remote server using SSH + Docker Compose.
 
@@ -86,8 +88,11 @@ jobs:
           context: .                                  # Build context is the root directory
           push: true                                  # Push the image to registry
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}     # Tag with commit SHA
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest                # Tag as "latest"
+            # Tag with commit SHA
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            
+             # Tag as "latest"
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
       # Logout from Docker
       - name: 🚪 Logout from Docker
