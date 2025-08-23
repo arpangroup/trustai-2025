@@ -1,0 +1,46 @@
+# .github/workflows/deploy-remote-build.yml <--- Builds image on server
+
+name: 🚀 Deploy to Remote Server
+
+# Trigger this workflow on push to the main branch
+on:
+#  push:
+#    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Remote Server (Build on Server)
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code from the GitHub repo
+      - name: 📥 Checkout source code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up SSH using the private key stored in GitHub Secrets
+      # This allows secure access to your remote server
+      - name: 🔐 Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # Step 3: Create the application directory on the remote server (if not already present)
+      # and copy the contents of the repo (including Dockerfile and docker-compose.yml) to that location
+      - name: 🛠 Copy files to remote server
+        run: |
+          # Create app directory on remote server
+          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "mkdir -p ${{ secrets.APP_DIR }}"
+          
+          # Securely copy all files in the repo to the remote app directory
+          scp -r ./* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.APP_DIR }}
+
+      # Step 4: Log into the remote server, navigate to the app directory,
+      # shut down any existing Docker containers, and bring up the new ones
+      - name: 🐳 Deploy with Docker Compose
+        run: |
+          ssh ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} <<EOF
+            cd ${{ secrets.APP_DIR }}
+            docker compose down
+            docker compose up -d --build
+          EOF
