@@ -1,0 +1,73 @@
+# 📝 Workflow Name
+name: Deploy (JAR + systemd)
+
+# 🚀 Trigger deployment only when code is pushed to the main branch
+on:
+#  push:
+#    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use GitHub's hosted Ubuntu runner
+
+    steps:
+      # ✅ Step 1: Checkout the code from your GitHub repository
+      - uses: actions/checkout@v4
+
+      # ✅ Step 2: Set up Java 21 using Temurin distribution
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      # ✅ Step 3: Build the Spring Boot project using Maven
+      # -B = batch mode (non-interactive)
+      # -DskipTests = skip unit tests to speed up the build
+      - name: Build
+        run: mvn -B -DskipTests package
+
+      # ✅ Step 4: Copy the built JAR file to the remote server
+      # This uses the `appleboy/scp-action` to securely upload the file via SCP
+      - name: Copy JAR to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}              # IP or hostname of the remote server
+          username: ${{ secrets.SERVER_USER }}          # SSH username (e.g., ubuntu)
+          key: ${{ secrets.SSH_PRIVATE_KEY }}           # Private key for authentication
+          port: ${{ secrets.SERVER_SSH_PORT }}          # Usually 22 unless custom
+          source: "target/*.jar"                        # Path to the generated JAR
+          target: "/opt/myapp/"                         # Where to copy the JAR on the server
+
+      # ✅ Step 5: SSH into the server and deploy the JAR via systemd
+      # - Move the new JAR into place
+      # - Set ownership to the spring user
+      # - Restart the systemd service
+      # - Show its status
+      - name: Move & restart
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            set -e  # Exit on error
+            
+            # 🔍 Find the latest JAR file in the copied directory
+            JAR=$(ls -t /opt/myapp/target/*.jar | head -n1 || echo "")
+
+            # 🛑 Fail if no JAR was found
+            if [ -z "$JAR" ]; then echo "No JAR found"; exit 1; fi
+
+            # 📦 Move it to a consistent filename
+            sudo mv "$JAR" /opt/myapp/app.jar
+
+            # 👤 Set ownership (ensure the 'spring' user has permission)
+            sudo chown spring:spring /opt/myapp/app.jar
+
+            # 🔁 Restart the app using systemd service manager
+            sudo systemctl restart myapp
+
+            # 📋 Show the status of the app (no pager, full output)
+            sudo systemctl status myapp --no-pager -l
