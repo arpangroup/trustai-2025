@@ -142,6 +142,13 @@ jobs:
 
       - name: Test SSH connection
         run: ssh -i ~/.ssh/id_rsa -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo connected ✅"
+          
+      # ✅ Step 3.5: Copy docker-compose.yml to remote server
+      - name: 📦 Copy docker-compose.yml to remote
+        run: |
+          scp -i ~/.ssh/id_rsa -P ${{ secrets.REMOTE_SSH_PORT }} \
+            docker-compose.yml \
+            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/trustaiapp/
 
 
       # ✅ Step 4: Connect to server, log in to GHCR, pull image, update Docker Compose, and restart services
