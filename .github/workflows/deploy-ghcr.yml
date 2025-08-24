@@ -32,6 +32,8 @@ env:
   REGISTRY: ghcr.io                         # GHCR registry
   IMAGE_NAME: ${{ github.repository }}      # Repo name as image name (owner/repo)
   IMAGE_TAG: ${{ github.sha }}
+  REMOTE_USER: ${{ secrets.REMOTE_USER }}
+  REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
 
 jobs:
   # 🔨 Job 1: Build Docker image and push to GHCR
@@ -143,7 +145,7 @@ jobs:
       # ✅ Step 4: Connect to server, log in to GHCR, pull image, update Docker Compose, and restart services
       - name: 🚀 Remote deploy
         run: |
-          ssh -p ${PORT:-22} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} \
+          ssh -i ~/.ssh/id_rsa -p 22 $REMOTE_USER@$secrets.REMOTE_HOST \
           'set -e
 
            # ➡️ Move into the deployment directory on the server
