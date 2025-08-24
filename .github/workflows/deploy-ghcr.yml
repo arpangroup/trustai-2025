@@ -35,6 +35,7 @@ env:
   REMOTE_USER: ${{ secrets.REMOTE_USER }}
   REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
   GHCR_USER: "arpangroup"
+  GHCR_PAT: ${{ secrets.GHCR_PAT }}
 
 jobs:
   # 🔨 Job 1: Build Docker image and push to GHCR
@@ -147,6 +148,12 @@ jobs:
       - name: 🚀 Remote deploy
         run: |
           ssh -i ~/.ssh/id_rsa -p 22 $REMOTE_USER@$REMOTE_HOST \
+          "GHCR_USER='${GHCR_USER}' \
+            GHCR_PAT='${GHCR_PAT}' \
+            TAG='${TAG}' \
+            REPO='${REPO}' \
+            DEPLOY_PATH='${DEPLOY_PATH}' \
+            bash -s" << 'ENDSSH'
           'set -e
 
            # ➡️ Move into the deployment directory on the server
