@@ -149,35 +149,47 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << EOF
             set -e
-          
+      
             echo "📂 Moving into deploy path: ${DEPLOY_PATH}"
-            cd ${DEPLOY_PATH}
-          
+            cd "${DEPLOY_PATH}"
+      
             echo "📍 Current directory: \$(pwd)"
-          
+      
             echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
-          
+      
             echo "📦 Pulling Docker image: ghcr.io/${REPO}:${IMAGE_TAG}"
-            docker pull ghcr.io/${REPO}:${TAG}
-            
+            docker pull ghcr.io/${REPO}:${IMAGE_TAG}
+      
             echo "🛠️ Updating .env file"
             touch .env
             if grep -q "^IMAGE_TAG=" .env; then
-              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${TAG}/" .env
+              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG}/" .env
             else
-              echo "IMAGE_TAG=${TAG}" >> .env
+              echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
             fi
-          
+      
             echo "🔄 Pulling updated services"
             docker compose pull || docker-compose pull
-          
+      
             echo "🚀 Restarting containers"
             docker compose up -d --remove-orphans || docker-compose up -d --remove-orphans
-          
-            echo "🧹 Pruning unused Docker images"          
+      
+            echo "🧹 Pruning unused Docker images"
             docker image prune -f
           EOF
-          
+
+        env:
+          IMAGE_TAG: ${{ steps.tag.outputs.val }}     # Image tag chosen above
+          REPO: ${{ github.repository }}              # e.g., username/repo
+          GHCR_USER: ${{ secrets.GHCR_USERNAME }}     # GHCR username (same as GitHub)
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}           # GitHub Personal Access Token with packages write scope
+          PORT: ${{ secrets.REMOTE_SSH_PORT }}        # SSH port
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}     # Directory on remote server with docker-compose.yml
+
+
+
+
+
 #          "GHCR_USER='${GHCR_USER}' \
 #            GHCR_PAT='${GHCR_PAT}' \
 #            TAG='${TAG}' \
@@ -213,11 +225,3 @@ jobs:
 #           # 🧹 Clean up unused images to save disk space
 #           docker image prune -f
 #          '
-        env:
-          TAG: ${{ steps.tag.outputs.val }}           # Image tag chosen above
-          IMAGE_TAG: ${{ steps.tag.outputs.val }}           # Image tag chosen above
-          REPO: ${{ github.repository }}              # e.g., username/repo
-          GHCR_USER: ${{ secrets.GHCR_USERNAME }}     # GHCR username (same as GitHub)
-          GHCR_PAT: ${{ secrets.GHCR_PAT }}           # GitHub Personal Access Token with packages write scope
-          PORT: ${{ secrets.REMOTE_SSH_PORT }}        # SSH port
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}     # Directory on remote server with docker-compose.yml
