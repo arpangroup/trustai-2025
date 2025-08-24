@@ -151,7 +151,7 @@ jobs:
             set -e
           
             echo "📂 Moving into deploy path: ${DEPLOY_PATH}"
-            cd '${DEPLOY_PATH}'
+            cd ${DEPLOY_PATH}
           
             echo "📍 Current directory: \$(pwd)"
           
