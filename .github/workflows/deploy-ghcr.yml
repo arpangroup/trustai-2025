@@ -184,23 +184,23 @@ jobs:
             
             # Ensure REGISTRY is set
             if grep -q "^REGISTRY=" .env; then
-              sed -i "s/^REGISTRY=.*/REGISTRY=$REGISTRY/" .env
+            sed -i "s|^REGISTRY=.*|REGISTRY=$REGISTRY|" .env
             else
-              echo "REGISTRY=$REGISTRY" >> .env
+            echo "REGISTRY=$REGISTRY" >> .env
             fi
-          
+            
             # Ensure IMAGE_NAME is set
             if grep -q "^IMAGE_NAME=" .env; then
-              sed -i "s/^IMAGE_NAME=.*/IMAGE_NAME=$IMAGE_NAME/" .env
+            sed -i "s|^IMAGE_NAME=.*|IMAGE_NAME=$IMAGE_NAME|" .env
             else
-              echo "IMAGE_NAME=$IMAGE_NAME" >> .env
+            echo "IMAGE_NAME=$IMAGE_NAME" >> .env
             fi
-          
+            
             # Ensure IMAGE_TAG is set
             if grep -q "^IMAGE_TAG=" .env; then
-              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$IMAGE_TAG/" .env
+            sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$IMAGE_TAG|" .env
             else
-              echo "IMAGE_TAG=$IMAGE_TAG" >> .env
+            echo "IMAGE_TAG=$IMAGE_TAG" >> .env
             fi
 
             echo "🔄 Pulling updated services"
