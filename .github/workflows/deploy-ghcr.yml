@@ -147,7 +147,7 @@ jobs:
       # ✅ Step 4: Connect to server, log in to GHCR, pull image, update Docker Compose, and restart services
       - name: 🚀 Deploy to Remote Server
         run: |
-          ssh -i ~/.ssh/id_rsa -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << EOF
+          ssh -i ~/.ssh/id_rsa -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
             set -e
 
             echo "Available directories:"
@@ -155,32 +155,32 @@ jobs:
             echo "Listing home directory:"
             ls -ld /home
             echo "Listing deploy path directory:"
-            ls -ld "${{ DEPLOY_PATH }}"
-      
-            echo "📂 Moving into deploy path: ${{ DEPLOY_PATH }}"
-            cd "${{ DEPLOY_PATH }}"
-      
+            ls -ld "$DEPLOY_PATH"
+
+            echo "📂 Moving into deploy path: $DEPLOY_PATH"
+            cd "$DEPLOY_PATH"
+
             echo "📍 Current directory: \$(pwd)"
-      
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
-      
-            echo "📦 Pulling Docker image: ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.val }}"
-            docker pull ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.val }}
-      
+
+            echo "$GHCR_PAT" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+
+            echo "📦 Pulling Docker image: ghcr.io/$REPO:$IMAGE_TAG"
+            docker pull ghcr.io/$REPO:$IMAGE_TAG
+
             echo "🛠️ Updating .env file"
             touch .env
             if grep -q "^IMAGE_TAG=" .env; then
-              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${{ steps.tag.outputs.val }}/" .env
+              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$IMAGE_TAG/" .env
             else
-               echo "IMAGE_TAG=${{ steps.tag.outputs.val }}" >> .env
+              echo "IMAGE_TAG=$IMAGE_TAG" >> .env
             fi
-      
+
             echo "🔄 Pulling updated services"
             docker compose pull || docker-compose pull
-      
+
             echo "🚀 Restarting containers"
             docker compose up -d --remove-orphans || docker-compose up -d --remove-orphans
-      
+
             echo "🧹 Pruning unused Docker images"
             docker image prune -f
           EOF
