@@ -137,7 +137,7 @@ jobs:
           ssh-keyscan -p 22 ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
 
       - name: Test SSH connection
-        run: ssh -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo connected ✅"
+        run: ssh -p ${{ secrets.REMOTE_SSH_PORT }} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo connected ✅"
 
 
       # ✅ Step 4: Connect to server, log in to GHCR, pull image, update Docker Compose, and restart services
