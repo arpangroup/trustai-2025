@@ -155,10 +155,10 @@ jobs:
       
             echo "📍 Current directory: \$(pwd)"
       
-            echo "${{ secrets.GHCR_PAT }}" | sudo docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
       
             echo "📦 Pulling Docker image: ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.val }}"
-            sudo docker pull ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.val }}
+            docker pull ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.val }}
       
             echo "🛠️ Updating .env file"
             touch .env
@@ -169,13 +169,13 @@ jobs:
             fi
       
             echo "🔄 Pulling updated services"
-            sudo docker compose pull || sudo docker-compose pull
+            docker compose pull || docker-compose pull
       
             echo "🚀 Restarting containers"
-            sudo docker compose up -d --remove-orphans || sudo docker-compose up -d --remove-orphans
+            docker compose up -d --remove-orphans || docker-compose up -d --remove-orphans
       
             echo "🧹 Pruning unused Docker images"
-            sudo docker image prune -f
+            docker image prune -f
           EOF
 
         env:
