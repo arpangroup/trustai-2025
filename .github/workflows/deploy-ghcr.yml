@@ -184,7 +184,8 @@ jobs:
           GHCR_USER: ${{ secrets.GHCR_USERNAME }}     # GHCR username (same as GitHub)
           GHCR_PAT: ${{ secrets.GHCR_PAT }}           # GitHub Personal Access Token with packages write scope
           PORT: ${{ secrets.REMOTE_SSH_PORT }}        # SSH port
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}     # Directory on remote server with docker-compose.yml
+#          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}     # Directory on remote server with docker-compose.yml
+          DEPLOY_PATH: "/home/trustaiapp"
 
 
 
