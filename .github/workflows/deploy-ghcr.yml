@@ -145,44 +145,57 @@ jobs:
 
 
       # ✅ Step 4: Connect to server, log in to GHCR, pull image, update Docker Compose, and restart services
-      - name: 🚀 Remote deploy
+      - name: 🚀 Deploy to Remote Server
         run: |
-          ssh -i ~/.ssh/id_rsa -p 22 $REMOTE_USER@$REMOTE_HOST \
-          "GHCR_USER='${GHCR_USER}' \
-            GHCR_PAT='${GHCR_PAT}' \
-            TAG='${TAG}' \
-            REPO='${REPO}' \
-            DEPLOY_PATH='${DEPLOY_PATH}' \
-            bash -s" << 'ENDSSH'
-          'set -e
-
-           # ➡️ Move into the deployment directory on the server
-           cd ${DEPLOY_PATH:-/opt/myapp}
-
-           # 🔐 Login to GHCR
-           echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
-
-           # 📌 Export variables for use in shell
-           export IMAGE_TAG="${TAG}"
-           export REPO="${REPO}"
-
-           # ⬇️ Pull the desired image version
-           docker pull ghcr.io/${REPO}:${IMAGE_TAG}
-
-           # ⚙️ Update the IMAGE_TAG in .env (used by docker-compose)
-           if grep -q "^IMAGE_TAG=" .env; then
-             sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG}/" .env
-           else
-             echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
-           fi
-
-           # 🔁 Pull updated images and restart containers
-           docker compose pull
-           docker compose up -d --remove-orphans
-
-           # 🧹 Clean up unused images to save disk space
-           docker image prune -f
-          '
+          ssh -i ~/.ssh/id_rsa -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
+            cd '${DEPLOY_PATH}'
+            echo 'Current Directory: $pwd'
+            docker pull ghcr.io/${REPO}:${IMAGE_TAG}
+            if grep -q "^IMAGE_TAG=" .env; then
+            sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG}/" .env
+            else
+            echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
+            fi
+            docker compose pull || docker-compose pull
+            docker compose up -d --remove-orphans || docker-compose up -d --remove-orphans
+            docker image prune -f
+          EOF
+          
+#          "GHCR_USER='${GHCR_USER}' \
+#            GHCR_PAT='${GHCR_PAT}' \
+#            TAG='${TAG}' \
+#            REPO='${REPO}' \
+#            DEPLOY_PATH='${DEPLOY_PATH}' \
+#            bash -s" << 'ENDSSH'
+#          'set -e
+#
+#           # ➡️ Move into the deployment directory on the server
+#           cd ${DEPLOY_PATH:-/opt/myapp}
+#
+#           # 🔐 Login to GHCR
+#           echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+#
+#           # 📌 Export variables for use in shell
+#           export IMAGE_TAG="${TAG}"
+#           export REPO="${REPO}"
+#
+#           # ⬇️ Pull the desired image version
+#           docker pull ghcr.io/${REPO}:${IMAGE_TAG}
+#
+#           # ⚙️ Update the IMAGE_TAG in .env (used by docker-compose)
+#           if grep -q "^IMAGE_TAG=" .env; then
+#             sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG}/" .env
+#           else
+#             echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
+#           fi
+#
+#           # 🔁 Pull updated images and restart containers
+#           docker compose pull
+#           docker compose up -d --remove-orphans
+#
+#           # 🧹 Clean up unused images to save disk space
+#           docker image prune -f
+#          '
         env:
           TAG: ${{ steps.tag.outputs.val }}           # Image tag chosen above
           REPO: ${{ github.repository }}              # e.g., username/repo
