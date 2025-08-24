@@ -149,6 +149,13 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << EOF
             set -e
+
+            echo "Available directories:"
+            ls -ld /
+            echo "Listing home directory:"
+            ls -ld /home
+            echo "Listing deploy path directory:"
+            ls -ld "${{ secrets.DEPLOY_PATH }}"
       
             echo "📂 Moving into deploy path: ${{ secrets.DEPLOY_PATH }}"
             cd "${{ secrets.DEPLOY_PATH }}"
