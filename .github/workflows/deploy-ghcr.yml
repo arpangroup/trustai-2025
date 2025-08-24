@@ -155,10 +155,10 @@ jobs:
             echo "Listing home directory:"
             ls -ld /home
             echo "Listing deploy path directory:"
-            ls -ld "${{ secrets.DEPLOY_PATH }}"
+            ls -ld "${{ DEPLOY_PATH }}"
       
-            echo "📂 Moving into deploy path: ${{ secrets.DEPLOY_PATH }}"
-            cd "${{ secrets.DEPLOY_PATH }}"
+            echo "📂 Moving into deploy path: ${{ DEPLOY_PATH }}"
+            cd "${{ DEPLOY_PATH }}"
       
             echo "📍 Current directory: \$(pwd)"
       
