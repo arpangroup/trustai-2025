@@ -147,17 +147,34 @@ jobs:
       # ✅ Step 4: Connect to server, log in to GHCR, pull image, update Docker Compose, and restart services
       - name: 🚀 Deploy to Remote Server
         run: |
-          ssh -i ~/.ssh/id_rsa -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_rsa -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << EOF
+            set -e
+          
+            echo "📂 Moving into deploy path: ${DEPLOY_PATH}"
             cd '${DEPLOY_PATH}'
-            echo 'Current Directory: $pwd'
-            docker pull ghcr.io/${REPO}:${IMAGE_TAG}
+          
+            echo "📍 Current directory: \$(pwd)"
+          
+            echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+          
+            echo "📦 Pulling Docker image: ghcr.io/${REPO}:${IMAGE_TAG}"
+            docker pull ghcr.io/${REPO}:${TAG}
+            
+            echo "🛠️ Updating .env file"
+            touch .env
             if grep -q "^IMAGE_TAG=" .env; then
-            sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG}/" .env
+              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${TAG}/" .env
             else
-            echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
+              echo "IMAGE_TAG=${TAG}" >> .env
             fi
+          
+            echo "🔄 Pulling updated services"
             docker compose pull || docker-compose pull
+          
+            echo "🚀 Restarting containers"
             docker compose up -d --remove-orphans || docker-compose up -d --remove-orphans
+          
+            echo "🧹 Pruning unused Docker images"          
             docker image prune -f
           EOF
           
@@ -198,6 +215,7 @@ jobs:
 #          '
         env:
           TAG: ${{ steps.tag.outputs.val }}           # Image tag chosen above
+          IMAGE_TAG: ${{ steps.tag.outputs.val }}           # Image tag chosen above
           REPO: ${{ github.repository }}              # e.g., username/repo
           GHCR_USER: ${{ secrets.GHCR_USERNAME }}     # GHCR username (same as GitHub)
           GHCR_PAT: ${{ secrets.GHCR_PAT }}           # GitHub Personal Access Token with packages write scope
