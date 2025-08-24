@@ -110,6 +110,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ✅ Step 0: Checkout repository so docker-compose.yml is available
+      - name: 📥 Checkout source code
+        uses: actions/checkout@v4
+
+
       # ✅ Step 1: Decide which image tag to deploy
       - name: 🎯 Pick image tag
         id: tag
