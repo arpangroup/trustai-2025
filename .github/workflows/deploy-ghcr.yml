@@ -150,32 +150,32 @@ jobs:
           ssh -i ~/.ssh/id_rsa -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << EOF
             set -e
       
-            echo "📂 Moving into deploy path: ${DEPLOY_PATH}"
-            cd "${DEPLOY_PATH}"
+            echo "📂 Moving into deploy path: ${{ secrets.DEPLOY_PATH }}"
+            cd "${{ secrets.DEPLOY_PATH }}"
       
             echo "📍 Current directory: \$(pwd)"
       
-            echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+            echo "${{ secrets.GHCR_PAT }}" | sudo docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
       
-            echo "📦 Pulling Docker image: ghcr.io/${REPO}:${IMAGE_TAG}"
-            docker pull ghcr.io/${REPO}:${IMAGE_TAG}
+            echo "📦 Pulling Docker image: ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.val }}"
+            sudo docker pull ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.val }}
       
             echo "🛠️ Updating .env file"
             touch .env
             if grep -q "^IMAGE_TAG=" .env; then
-              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG}/" .env
+              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${{ steps.tag.outputs.val }}/" .env
             else
-              echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
+               echo "IMAGE_TAG=${{ steps.tag.outputs.val }}" >> .env
             fi
       
             echo "🔄 Pulling updated services"
-            docker compose pull || docker-compose pull
+            sudo docker compose pull || sudo docker-compose pull
       
             echo "🚀 Restarting containers"
-            docker compose up -d --remove-orphans || docker-compose up -d --remove-orphans
+            sudo docker compose up -d --remove-orphans || sudo docker-compose up -d --remove-orphans
       
             echo "🧹 Pruning unused Docker images"
-            docker image prune -f
+            sudo docker image prune -f
           EOF
 
         env:
