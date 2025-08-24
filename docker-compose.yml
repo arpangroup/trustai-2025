@@ -19,6 +19,8 @@ services:
       spring.datasource.password: ${DB_PASSWORD}
       spring.jpa.hibernate.ddl-auto: create
     restart: unless-stopped
+    networks:
+      - backend
 
   db:
     image: mysql:8.0
@@ -41,6 +43,10 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped # always
+    networks:
+      - backend
 
 volumes:
   mysql_data:
+networks:
+  backend:
