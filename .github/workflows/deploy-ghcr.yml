@@ -147,7 +147,7 @@ jobs:
       # ✅ Step 4: Connect to server, log in to GHCR, pull image, update Docker Compose, and restart services
       - name: 🚀 Deploy to Remote Server
         run: |
-          ssh -i ~/.ssh/id_rsa -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_rsa -p 22 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << EOF
             set -e
 
             echo "Available directories:"
