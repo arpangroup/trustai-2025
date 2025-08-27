@@ -56,6 +56,7 @@ public class SecurityConfig {
 
         http
                 .securityMatcher("/api/**")
+                .cors(cors -> {})   // 👈 enable CORS handling here <---Without .cors(cors -> {}), Spring Security ignores the WebMvcConfigurer CORS settings.
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(e -> e.
