@@ -20,9 +20,9 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**") // only for API endpoints
                         //.allowedOrigins("*") // Change in production
-                        .allowedOriginPatterns("*") // // allow all origins
+//                        .allowedOriginPatterns("*") // // allow all origins
 //                        .allowedOrigins("https://trustai.co.in")  // ✅ your frontend domain
-//                        .allowedOrigins("http://localhost:5173", "https://trustai.co.in")
+                        .allowedOrigins("http://localhost:5173", "https://trustai.co.in")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

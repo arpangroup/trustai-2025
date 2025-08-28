@@ -58,7 +58,6 @@ public class SecurityConfig {
                 .securityMatcher("/api/**")
                 .cors(cors -> {})   // 👈 enable CORS handling here <---Without .cors(cors -> {}), Spring Security ignores the WebMvcConfigurer CORS settings.
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(e -> e.
                         authenticationEntryPoint(unauthorizedHandler)   // 401 handler
                         .accessDeniedHandler(customAccessDeniedHandler) // <-- 403 handler
@@ -68,6 +67,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/api/v1/register/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Order is important: check internal token before JWT
                 // The order of these two lines matters — whichever you call last will run first. So to run internalTokenAuthFilter before JWT, make sure it’s added after JWT:
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
