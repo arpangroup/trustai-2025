@@ -11,6 +11,13 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 RUN addgroup -S cicd_deploy && adduser -S cicd_deploy -G cicd_deploy
 COPY app-backend/target/*.jar trustai_backend.jar
+
+# Create the log directory
+RUN mkdir -p /logs
+
+# Optional: give full access just in case
+RUN chmod -R 777 /logs
+
 USER cicd_deploy
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/trustai_backend.jar"]
