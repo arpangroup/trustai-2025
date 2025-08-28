@@ -60,6 +60,7 @@ public class UserController extends BaseController {
 
     @GetMapping("/info")
     public ResponseEntity<UserInfo> getUserInfo() {
+        log.info("getUserInfo ..............");
         Long userId = getCurrentUserId();
         log.info("getUserInfo for User ID: {}......", userId);
         User user = userService.getUserById(userId);

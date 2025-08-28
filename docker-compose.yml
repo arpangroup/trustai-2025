@@ -21,6 +21,8 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    volumes:
+      - ./app-logs:/logs  # Logs are saved to host directory
 
   db:
     image: mysql:8.0

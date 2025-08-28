@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/register")
+@RequestMapping("/api/register")
 @RequiredArgsConstructor
 @Slf4j
 public class RegistrationController {
