@@ -113,41 +113,4 @@ public class SecurityConfig {
         return http.build();
     }
 
-
-    /*
-    // If you want fully separate chains (recommended for clarity), create two SecurityFilterChain beans: one
-    // matching /api/** (stateless) and one for UI (stateful). Example is left as an exercise but straightforward.
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProvider, userDetailsService);
-
-        http
-                .cors(cors -> cors.disable())
-                // CSRF: enable for form logins; disable for stateless API endpoints if necessary
-                //.csrf(csrf -> csrf.disable())
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
-                // Session for form UI only:
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                //.exceptionHandling(e -> e.authenticationEntryPoint(unauthorizedHandler))
-                .securityMatcher("/**") // apply rules globally; we'll separate endpoints below
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**", "/public/**", "/api/auth/**", "/favicon.ico", "/h2-console").permitAll()
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().authenticated()
-                )
-                //.httpBasic(Customizer.withDefaults()) // basic Auth ==> username, password
-//                .formLogin(Customizer.withDefaults())
-                .formLogin(form -> form
-                        //.loginPage("/login")
-                        .defaultSuccessUrl("/", true)
-                        .permitAll()
-                )
-                .logout(l -> l.logoutUrl("/logout").permitAll())
-                // Add JWT filter before UsernamePasswordAuthenticationFilter so API calls are processed
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // For API statelessness you could also define two http security filter chains separated by request matchers.
-        return http.build();
-    }*/
-
 }

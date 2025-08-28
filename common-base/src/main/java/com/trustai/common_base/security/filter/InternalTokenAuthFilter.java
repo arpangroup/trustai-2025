@@ -43,4 +43,10 @@ public class InternalTokenAuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
 
     }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/api/auth/") || path.startsWith("/api/v1/register/");
+    }
 }
