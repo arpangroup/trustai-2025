@@ -77,7 +77,7 @@ jobs:
             
             # 🔍 Find the latest JAR file in the copied directory
             JAR_BASENAME="${{ steps.get-jar.outputs.jar_basename }}"
-            FULL_PATH="${DEPLOY_PATH}${JAR_BASENAME}"
+            FULL_PATH="/opt/myapp/app-backend/target/$JAR_BASENAME"
             
             echo "🧾 Checking for uploaded JAR at $FULL_PATH"
             ls -lh "/opt/myapp/${JAR_BASENAME}"
