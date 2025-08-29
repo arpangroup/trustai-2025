@@ -17,15 +17,15 @@ name: Deploy (Docker + GHCR)
 # 🟡 Trigger the workflow:
 # - On push to the main branch
 # - Or manually via the GitHub UI (workflow_dispatch)
-on:
-  push:
-    branches: ["main"]
-  workflow_dispatch:
-    inputs:
-      image_tag:
-        description: "Override image tag to deploy (default: commit SHA)"
-        required: false
-        default: ""
+#on:
+#  push:
+#    branches: ["main"]
+#  workflow_dispatch:
+#    inputs:
+#      image_tag:
+#        description: "Override image tag to deploy (default: commit SHA)"
+#        required: false
+#        default: ""
 
 # 🌍 Environment variables available to all jobs
 env:

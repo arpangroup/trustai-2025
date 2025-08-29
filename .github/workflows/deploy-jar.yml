@@ -3,20 +3,24 @@ name: Deploy (JAR + systemd)
 
 # 🚀 Trigger deployment only when code is pushed to the main branch
 on:
-#  push:
-#    branches: ["main"]
-  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+env:
+  DEPLOY_PATH: "/opt/myapp/"
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest  # Use GitHub's hosted Ubuntu runner
 
     steps:
       # ✅ Step 1: Checkout the code from your GitHub repository
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       # ✅ Step 2: Set up Java 21 using Temurin distribution
-      - uses: actions/setup-java@v4
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -24,50 +28,67 @@ jobs:
       # ✅ Step 3: Build the Spring Boot project using Maven
       # -B = batch mode (non-interactive)
       # -DskipTests = skip unit tests to speed up the build
-      - name: Build
+      - name: Build with Maven
         run: mvn -B -DskipTests package
 
-      # ✅ Step 4: Copy the built JAR file to the remote server
-      # This uses the `appleboy/scp-action` to securely upload the file via SCP
-      - name: Copy JAR to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}              # IP or hostname of the remote server
-          username: ${{ secrets.SERVER_USER }}          # SSH username (e.g., ubuntu)
-          key: ${{ secrets.SSH_PRIVATE_KEY }}           # Private key for authentication
-          port: ${{ secrets.SERVER_SSH_PORT }}          # Usually 22 unless custom
-          source: "target/*.jar"                        # Path to the generated JAR
-          target: "/opt/myapp/"                         # Where to copy the JAR on the server
+      #      # Setup Run Unit Tests
+      #      - name: Unit Tests
+      #        run: mvn -B test --file pom.xml   # po.xml from root directory
 
-      # ✅ Step 5: SSH into the server and deploy the JAR via systemd
+      # ✅ Step 4: Get the built JAR filename
+      - name: Get JAR name
+        id: get-jar
+        run: |
+          JAR_NAME=$(ls target/*.jar | head -n1)
+          echo "JAR_NAME=$JAR_NAME" >> $GITHUB_ENV
+          echo "JAR_BASENAME=$(basename $JAR_NAME)" >> $GITHUB_ENV
+
+      # ✅ Step 5: Copy the built JAR file to the remote server
+      - name: Copy JAR to server
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.REMOTE_HOST }}              # IP or hostname of the remote server
+          username: ${{ secrets.REMOTE_USER }}          # SSH username (e.g., ubuntu)
+          key: ${{ secrets.SSH_PRIVATE_KEY }}           # Private key for authentication
+          port: 22                                      # Usually 22 unless custom
+          source: ${{ steps.get-jar.outputs.jar_name }} # Path to the generated JAR
+          target: ${{ env.DEPLOY_PATH }}                # Where to copy the JAR on the server
+
+      # ✅ Step 6: SSH into the server and deploy the JAR via systemd
       # - Move the new JAR into place
       # - Set ownership to the spring user
       # - Restart the systemd service
       # - Show its status
-      - name: Move & restart
+      - name: Deploy on server
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          port: 22
           script: |
             set -e  # Exit on error
             
             # 🔍 Find the latest JAR file in the copied directory
-            JAR=$(ls -t /opt/myapp/target/*.jar | head -n1 || echo "")
-
+            JAR_BASENAME="${{ steps.get-jar.outputs.jar_basename }}"
+            FULL_PATH="/opt/myapp/$JAR_BASENAME"
+            
             # 🛑 Fail if no JAR was found
-            if [ -z "$JAR" ]; then echo "No JAR found"; exit 1; fi
+            if [ ! -f "$FULL_PATH" ]; then
+              echo "❌ JAR not found at $FULL_PATH"
+              exit 1
+            fi
+          
 
             # 📦 Move it to a consistent filename
-            sudo mv "$JAR" /opt/myapp/app.jar
+            sudo mv "FULL_PATH" /opt/myapp/app.jar
 
             # 👤 Set ownership (ensure the 'spring' user has permission)
-            sudo chown spring:spring /opt/myapp/app.jar
+            sudo chown cicd_deploy:cicd_deploy /opt/myapp/app.jar
+            sudo chmod +x /opt/myapp/app.jar
 
             # 🔁 Restart the app using systemd service manager
             sudo systemctl restart myapp
 
             # 📋 Show the status of the app (no pager, full output)
-            sudo systemctl status myapp --no-pager -l
+            sudo systemctl status myapp --no-pager -l || sudo journalctl -u myapp --no-pager -n 50
