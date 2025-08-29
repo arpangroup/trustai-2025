@@ -72,14 +72,17 @@ jobs:
           script: |
             set -e  # Exit on error
             
+            echo "🧾 Listing files in /opt/myapp/"
+            ls -lh /opt/myapp/
+            
             # 🔍 Find the latest JAR file in the copied directory
             JAR_BASENAME="${{ steps.get-jar.outputs.jar_basename }}"
             FULL_PATH="${DEPLOY_PATH}${JAR_BASENAME}"
             
             echo "🧾 Checking for uploaded JAR at $FULL_PATH"
-            ls -lh "$FULL_PATH"
+            ls -lh "/opt/myapp/${JAR_BASENAME}"
             
-            # 📦 Move it to a consistent filename (/opt/myapp/app.jar)
+            echo "📦 Moving $FULL_PATH → /opt/myapp/app.jar"
             sudo mv "$FULL_PATH" /opt/myapp/app.jar
 
             # 👤 Set ownership (ensure the 'spring' user has permission)
