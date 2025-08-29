@@ -67,7 +67,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           source: "./app-backend-0.0.0-SNAPSHOT.jar"
-          target: ${{ env.DEPLOY_PATH }}
+          #tell scp-action to upload the JAR into the user’s home directory (where it has write access)
+          target: "~/"
 
       # ✅ Step 3: SSH into server and start the app
       - name: SSH into VPS and Start Application
@@ -85,7 +86,8 @@ jobs:
             ls -lh "/opt/myapp/app-backend-0.0.0-SNAPSHOT.jar"
 
             echo "📦 Moving JAR into place..."
-            mv -f /opt/myapp/app-backend-0.0.0-SNAPSHOT.jar /opt/myapp/app.jar
+            sudo mkdir -p /opt/myapp/
+            sudo mv -f ~/app-backend-0.0.0-SNAPSHOT.jar /opt/myapp/app.jar
 
             echo "🔁 Stopping old process..."
             pkill -f "/opt/myapp/app.jar" || echo "No app process found"
