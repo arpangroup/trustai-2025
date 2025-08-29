@@ -93,8 +93,8 @@ jobs:
             echo "🚀 Starting app in background..."
             java -jar /opt/myapp/app.jar > /opt/myapp/app_log.log 2>&1 < /dev/null &
 
-            echo "✅ App started, logs at /opt/myapp/app_log.log"
+#            echo "✅ App started, logs at /opt/myapp/app_log.log"
 #            tail -n 20 /opt/myapp/app_log.log || true
 
 #            disown
-            exit 0
+#            exit 0
