@@ -85,9 +85,18 @@ jobs:
             # 👤 Set ownership (ensure the 'spring' user has permission)
             chown cicd_deploy:cicd_deploy /opt/myapp/app.jar
             chmod +x /opt/myapp/app.jar
-
+                        
             # 🔁 Restart the app using systemd service manager
-            sudo systemctl restart myapp
+            # sudo systemctl restart myapp
 
             # 📋 Show the status of the app (no pager, full output)
-            sudo systemctl status myapp --no-pager -l || sudo journalctl -u myapp --no-pager -n 50
+            # sudo systemctl status myapp --no-pager -l || sudo journalctl -u myapp --no-pager -n 50
+            
+            # Kill existing app process (assuming running with java -jar /opt/myapp/app.jar)
+            pkill -f "/opt/myapp/app.jar" || echo "No app process found"
+            
+            # Start the app in the background (no terminal, keep running)
+            nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 &
+            
+            echo "App started, logs at /opt/myapp/app.log"
+
