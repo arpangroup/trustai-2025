@@ -98,11 +98,8 @@ jobs:
             pkill -f "/opt/myapp/app.jar" || echo "No app process found"
             
             # 🚀 Start the app in the background using nohup
-            echo "🔧 Starting app with nohup..."
-            {
-                setsid nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 < /dev/null &
-            } || true
+            nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 < /dev/null &
+            disown
             
             echo "✅ App started, logs at /opt/myapp/app.log"
-            tail -n 20 /opt/myapp/app.log
 
