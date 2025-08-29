@@ -40,8 +40,8 @@ jobs:
         id: get-jar
         run: |
           JAR_NAME=$(ls target/*.jar | head -n1)
-          echo "JAR_NAME=$JAR_NAME" >> $GITHUB_ENV
-          echo "JAR_BASENAME=$(basename $JAR_NAME)" >> $GITHUB_ENV
+          echo "jar_name=$JAR_NAME" >> $GITHUB_OUTPUT
+          echo "jar_basename=$(basename $JAR_NAME)" >> $GITHUB_OUTPUT
 
       # ✅ Step 5: Copy the built JAR file to the remote server
       - name: Copy JAR to server
@@ -81,7 +81,7 @@ jobs:
           
 
             # 📦 Move it to a consistent filename
-            sudo mv "FULL_PATH" /opt/myapp/app.jar
+            sudo mv "$FULL_PATH" /opt/myapp/app.jar
 
             # 👤 Set ownership (ensure the 'spring' user has permission)
             sudo chown cicd_deploy:cicd_deploy /opt/myapp/app.jar
