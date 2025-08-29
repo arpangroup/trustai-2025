@@ -70,8 +70,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            set -e
-            
+            set -o errexit
+            set -o pipefail
+      
+
             # 🔍 Find the latest JAR file in the copied directory
             JAR_BASENAME="${{ steps.get-jar.outputs.jar_basename }}"
             FULL_PATH="/opt/myapp/app-backend/target/$JAR_BASENAME"
@@ -97,8 +99,10 @@ jobs:
             
             # 🚀 Start the app in the background using nohup
             echo "🔧 Starting app with nohup..."
-            setsid nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 < /dev/null &
+            {
+                setsid nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 < /dev/null &
+            } || true
             
-            echo "App started, logs at /opt/myapp/app.log"
+            echo "✅ App started, logs at /opt/myapp/app.log"
             tail -n 20 /opt/myapp/app.log
 
