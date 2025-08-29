@@ -97,7 +97,7 @@ jobs:
             
             # 🚀 Start the app in the background using nohup
             echo "🔧 Starting app with nohup..."
-            nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 &
+            setsid nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 < /dev/null &
             
             echo "App started, logs at /opt/myapp/app.log"
 
