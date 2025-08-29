@@ -35,24 +35,27 @@ jobs:
       #      - name: Unit Tests
       #        run: mvn -B test --file pom.xml   # po.xml from root directory
 
-      # ✅ Step 4: Get the built JAR filename
+      # Verify the JAR actually exists:
+      - name: Verify build artifacts
+        run: ls -l app-backend/target
+
+      # ✅ Step 4: Get the built JAR filename - Set JAR name (hardcoded to known filename)
       - name: Get JAR name
         id: get-jar
         run: |
-          JAR_NAME=$(ls app-backend/target/*.jar | head -n1)
-          echo "jar_name=$JAR_NAME" >> $GITHUB_OUTPUT
-          echo "jar_basename=$(basename $JAR_NAME)" >> $GITHUB_OUTPUT
+          echo "jar_name=app-backend/target/app-backend-0.0.0-SNAPSHOT.jar" >> $GITHUB_OUTPUT
+          echo "jar_basename=app-backend-0.0.0-SNAPSHOT.jar" >> $GITHUB_OUTPUT
 
       # ✅ Step 5: Copy the built JAR file to the remote server
       - name: Copy JAR to server
         uses: appleboy/scp-action@v1
         with:
-          host: ${{ secrets.REMOTE_HOST }}              # IP or hostname of the remote server
-          username: ${{ secrets.REMOTE_USER }}          # SSH username (e.g., ubuntu)
-          key: ${{ secrets.SSH_PRIVATE_KEY }}           # Private key for authentication
-          port: 22                                      # Usually 22 unless custom
-          source: ${{ steps.get-jar.outputs.jar_name }} # Path to the generated JAR
-          target: ${{ env.DEPLOY_PATH }}                # Where to copy the JAR on the server
+          host: ${{ secrets.REMOTE_HOST }}                  # IP or hostname of the remote server
+          username: ${{ secrets.REMOTE_USER }}              # SSH username (e.g., ubuntu)
+          key: ${{ secrets.SSH_PRIVATE_KEY }}               # Private key for authentication
+          port: 22                                          # Usually 22 unless custom
+          source: "./${{ steps.get-jar.outputs.jar_name }}" # Path to the generated JAR
+          target: ${{ env.DEPLOY_PATH }}                    # Where to copy the JAR on the server
 
       # ✅ Step 6: SSH into the server and deploy the JAR via systemd
       # - Move the new JAR into place
@@ -71,16 +74,12 @@ jobs:
             
             # 🔍 Find the latest JAR file in the copied directory
             JAR_BASENAME="${{ steps.get-jar.outputs.jar_basename }}"
-            FULL_PATH="/opt/myapp/$JAR_BASENAME"
+            FULL_PATH="${DEPLOY_PATH}${JAR_BASENAME}"
             
-            # 🛑 Fail if no JAR was found
-            if [ ! -f "$FULL_PATH" ]; then
-              echo "❌ JAR not found at $FULL_PATH"
-              exit 1
-            fi
-          
-
-            # 📦 Move it to a consistent filename
+            echo "🧾 Checking for uploaded JAR at $FULL_PATH"
+            ls -lh "$FULL_PATH"
+            
+            # 📦 Move it to a consistent filename (/opt/myapp/app.jar)
             sudo mv "$FULL_PATH" /opt/myapp/app.jar
 
             # 👤 Set ownership (ensure the 'spring' user has permission)
