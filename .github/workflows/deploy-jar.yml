@@ -80,7 +80,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}               # Private key for authentication
           port: 22                                          # Usually 22 unless custom
 
-          source: "./${{ steps.get-jar.outputs.jar_name }}" # Path to the generated JAR
+          source: "./app-backend-0.0.0-SNAPSHOT.jar"        # Path to the generated JAR
           target: ${{ env.DEPLOY_PATH }}                    # Where to copy the JAR on the server
 
       # ✅ Step 6: SSH into the server and deploy the JAR via systemd
@@ -100,13 +100,14 @@ jobs:
             set -o pipefail      
 
             # 🔍 Find the latest JAR file in the copied directory
-            JAR_BASENAME="${{ steps.get-jar.outputs.jar_basename }}"
-            FULL_PATH="/opt/myapp/app-backend/target/$JAR_BASENAME"
+            #JAR_BASENAME="${{ steps.get-jar.outputs.jar_basename }}"
+            #FULL_PATH="/opt/myapp/app-backend/target/$JAR_BASENAME"
             
-            echo "🧾 Checking for uploaded JAR at $FULL_PATH"
-            ls -lh "$FULL_PATH"
+            echo "🧾 Checking for uploaded JAR at /opt/myapp/app-backend-0.0.0-SNAPSHOT.jar"
+            ls -lh "/opt/myapp/app-backend-0.0.0-SNAPSHOT.jar"
             
-            echo "📦 Moving $FULL_PATH → /opt/myapp/app.jar"
+            # Move the JAR to final location
+            echo "📦 Moving JAR into place..."
             # -f forces overwrite
             # mv -f "$FULL_PATH" /opt/myapp/app.jar
             mv -f "/opt/myapp/app-backend-0.0.0-SNAPSHOT.jar" /opt/myapp/app.jar
@@ -122,13 +123,15 @@ jobs:
             # sudo systemctl status myapp --no-pager -l || sudo journalctl -u myapp --no-pager -n 50
             
             # 🔁 Stop old process (if running)
+            echo "🔁 Stopping old process..."
             pkill -f "/opt/myapp/app.jar" || echo "No app process found"
             
             # 🚀 Start the app in the background using nohup
-            nohup java -jar /opt/myapp/app.jar > /opt/myapp/app_log.log 2>&1 & < /dev/null &
+            echo "🚀 Starting app in background..."
+            nohup java -jar /opt/myapp/app.jar > /opt/myapp/app_log.log 2>&1 < /dev/null &
               
-            echo "✅ App started, logs at /opt/myapp/app.log"
-            #tail -n 20 /opt/myapp/app_log.log || true
+            echo "✅ App started, logs at /opt/myapp/app_log.log"
+            tail -n 20 /opt/myapp/app_log.log || true
             
             disown
             exit 0
