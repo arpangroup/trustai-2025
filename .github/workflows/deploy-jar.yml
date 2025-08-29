@@ -39,7 +39,7 @@ jobs:
       - name: Get JAR name
         id: get-jar
         run: |
-          JAR_NAME=$(ls target/*.jar | head -n1)
+          JAR_NAME=$(ls app-backend/target/*.jar | head -n1)
           echo "jar_name=$JAR_NAME" >> $GITHUB_OUTPUT
           echo "jar_basename=$(basename $JAR_NAME)" >> $GITHUB_OUTPUT
 
