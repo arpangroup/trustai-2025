@@ -69,6 +69,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: jar-file
+          path: ./
 
       # ✅ Step 5: Copy the built JAR file to the remote server
       - name: Copy JAR to server
@@ -124,10 +125,10 @@ jobs:
             pkill -f "/opt/myapp/app.jar" || echo "No app process found"
             
             # 🚀 Start the app in the background using nohup
-            nohup java -jar /opt/myapp/app.jar > /opt/myapp/app_log.log 2>&1 &
+            nohup java -jar /opt/myapp/app.jar > /opt/myapp/app_log.log 2>&1 & < /dev/null &
               
             echo "✅ App started, logs at /opt/myapp/app.log"
-            #tail -n 20 /opt/myapp/app.log || true
+            #tail -n 20 /opt/myapp/app_log.log || true
             
             disown
             exit 0
