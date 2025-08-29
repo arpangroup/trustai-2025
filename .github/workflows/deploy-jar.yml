@@ -83,8 +83,8 @@ jobs:
             mv "$FULL_PATH" /opt/myapp/app.jar
 
             # 👤 Set ownership (ensure the 'spring' user has permission)
-            chown cicd_deploy:cicd_deploy /opt/myapp/app.jar
-            chmod +x /opt/myapp/app.jar
+            # chown cicd_deploy:cicd_deploy /opt/myapp/app.jar
+            # chmod +x /opt/myapp/app.jar
                         
             # 🔁 Restart the app using systemd service manager
             # sudo systemctl restart myapp
@@ -100,4 +100,5 @@ jobs:
             setsid nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 < /dev/null &
             
             echo "App started, logs at /opt/myapp/app.log"
+            tail -n 20 /opt/myapp/app.log
 
