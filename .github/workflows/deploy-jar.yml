@@ -80,14 +80,14 @@ jobs:
             ls -lh "$FULL_PATH"
             
             echo "📦 Moving $FULL_PATH → /opt/myapp/app.jar"
-            sudo mv "$FULL_PATH" /opt/myapp/app.jar
+            mv "$FULL_PATH" /opt/myapp/app.jar
 
             # 👤 Set ownership (ensure the 'spring' user has permission)
-            sudo chown cicd_deploy:cicd_deploy /opt/myapp/app.jar
-            sudo chmod +x /opt/myapp/app.jar
+            chown cicd_deploy:cicd_deploy /opt/myapp/app.jar
+            chmod +x /opt/myapp/app.jar
 
             # 🔁 Restart the app using systemd service manager
-            sudo systemctl restart myapp
+            systemctl restart myapp
 
             # 📋 Show the status of the app (no pager, full output)
-            sudo systemctl status myapp --no-pager -l || sudo journalctl -u myapp --no-pager -n 50
+            systemctl status myapp --no-pager -l || sudo journalctl -u myapp --no-pager -n 50
