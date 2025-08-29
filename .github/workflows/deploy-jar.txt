@@ -80,21 +80,18 @@ jobs:
           script: |
             set -o errexit
             set -o pipefail
-
+            
             echo "🧾 Checking for uploaded JAR"
             ls -lh "/opt/myapp/app-backend-0.0.0-SNAPSHOT.jar"
-
+            
             echo "📦 Moving JAR into place..."
             mv -f /opt/myapp/app-backend-0.0.0-SNAPSHOT.jar /opt/myapp/app.jar
-
-            echo "🔁 Stopping old process..."
-            pkill -f "/opt/myapp/app.jar" || echo "No app process found"
-
-            echo "🚀 Starting app in background..."
-            nohup java -jar /opt/myapp/app.jar > /opt/myapp/app_log.log 2>&1 < /dev/null &
-
-            echo "✅ App started, logs at /opt/myapp/app_log.log"
-            tail -n 20 /opt/myapp/app_log.log || true
-
-            disown
-            exit 0
+            
+            # Reload systemd in case unit changed
+            sudo systemctl daemon-reload
+            
+            # Restart app
+            sudo systemctl restart myapp
+            
+            # Show status
+            sudo systemctl status myapp --no-pager -l || sudo journalctl -u myapp --no-pager -n 50
