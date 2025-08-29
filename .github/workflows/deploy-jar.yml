@@ -25,8 +25,8 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Grant execute permission for MavenW
-        run: chmod +x ./mvnw
+#      - name: Grant execute permission for MavenW
+#        run: chmod +x ./mvnw
 
       # ✅ Step 3: Build the Spring Boot project using Maven
       # -B = batch mode (non-interactive)
