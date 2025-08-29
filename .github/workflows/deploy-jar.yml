@@ -70,17 +70,14 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            set -e  # Exit on error
-            
-            echo "🧾 Listing files in /opt/myapp/"
-            ls -lh /opt/myapp/
+            set -e
             
             # 🔍 Find the latest JAR file in the copied directory
             JAR_BASENAME="${{ steps.get-jar.outputs.jar_basename }}"
             FULL_PATH="/opt/myapp/app-backend/target/$JAR_BASENAME"
             
             echo "🧾 Checking for uploaded JAR at $FULL_PATH"
-            ls -lh "/opt/myapp/${JAR_BASENAME}"
+            ls -lh "$FULL_PATH"
             
             echo "📦 Moving $FULL_PATH → /opt/myapp/app.jar"
             sudo mv "$FULL_PATH" /opt/myapp/app.jar
