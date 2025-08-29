@@ -71,8 +71,7 @@ jobs:
           port: 22
           script: |
             set -o errexit
-            set -o pipefail
-      
+            set -o pipefail      
 
             # 🔍 Find the latest JAR file in the copied directory
             JAR_BASENAME="${{ steps.get-jar.outputs.jar_basename }}"
@@ -82,7 +81,8 @@ jobs:
             ls -lh "$FULL_PATH"
             
             echo "📦 Moving $FULL_PATH → /opt/myapp/app.jar"
-            mv "$FULL_PATH" /opt/myapp/app.jar
+            # -f forces overwrite
+            mv -f "$FULL_PATH" /opt/myapp/app.jar
 
             # 👤 Set ownership (ensure the 'spring' user has permission)
             # chown cicd_deploy:cicd_deploy /opt/myapp/app.jar
@@ -100,6 +100,6 @@ jobs:
             # 🚀 Start the app in the background using nohup
             nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 < /dev/null &
             disown
-            
+              
             echo "✅ App started, logs at /opt/myapp/app.log"
 
