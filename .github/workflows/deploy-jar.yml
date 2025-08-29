@@ -82,12 +82,12 @@ jobs:
             set -o errexit
             set -o pipefail
 
-            echo "🧾 Checking for uploaded JAR"
-            ls -lh "/opt/myapp/app-backend-0.0.0-SNAPSHOT.jar"
-
             echo "📦 Moving JAR into place..."
             sudo mkdir -p /opt/myapp/
             sudo mv -f ~/app-backend-0.0.0-SNAPSHOT.jar /opt/myapp/app.jar
+            
+            echo "🧾 Checking for uploaded JAR"
+            ls -lh "/opt/myapp/app-backend-0.0.0-SNAPSHOT.jar"
 
             echo "🔁 Stopping old process..."
             pkill -f "/opt/myapp/app.jar" || echo "No app process found"
