@@ -92,10 +92,11 @@ jobs:
             # 📋 Show the status of the app (no pager, full output)
             # sudo systemctl status myapp --no-pager -l || sudo journalctl -u myapp --no-pager -n 50
             
-            # Kill existing app process (assuming running with java -jar /opt/myapp/app.jar)
+            # 🔁 Stop old process (if running)
             pkill -f "/opt/myapp/app.jar" || echo "No app process found"
             
-            # Start the app in the background (no terminal, keep running)
+            # 🚀 Start the app in the background using nohup
+            echo "🔧 Starting app with nohup..."
             nohup java -jar /opt/myapp/app.jar > /opt/myapp/app.log 2>&1 &
             
             echo "App started, logs at /opt/myapp/app.log"
