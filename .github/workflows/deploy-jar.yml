@@ -87,7 +87,7 @@ jobs:
             chmod +x /opt/myapp/app.jar
 
             # 🔁 Restart the app using systemd service manager
-            systemctl restart myapp
+            sudo systemctl restart myapp
 
             # 📋 Show the status of the app (no pager, full output)
-            systemctl status myapp --no-pager -l || sudo journalctl -u myapp --no-pager -n 50
+            sudo systemctl status myapp --no-pager -l || sudo journalctl -u myapp --no-pager -n 50
