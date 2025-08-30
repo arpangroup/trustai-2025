@@ -87,7 +87,7 @@ jobs:
             mv -f ~/app-backend-0.0.0-SNAPSHOT.jar /opt/myapp/app.jar
             
             echo "🧾 Checking for uploaded JAR"
-            ls -lh "/opt/myapp/app-backend-0.0.0-SNAPSHOT.jar"
+            ls -lh "/opt/myapp/app.jar"
 
             echo "🔁 Stopping old process..."
             pkill -f "/opt/myapp/app.jar" || echo "No app process found"
